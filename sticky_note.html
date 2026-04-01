@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sticky Note Block – Preview</title>
+
+    <!-- Tailwind v4 CDN (no build needed) -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+    <!-- Lexend Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      /* Prevent text selection while dragging */
+      .dragging,
+      .dragging * {
+        user-select: none !important;
+      }
+
+      html,
+      body {
+        height: 100%;
+      }
+
+      body {
+        font-family: "Lexend", sans-serif;
+      }
+
+      /* Ensure list markers show inside the editor regardless of Tailwind resets */
+      .note-editor ul {
+        list-style: disc;
+        padding-left: 1.25rem;
+      }
+      .note-editor ol {
+        list-style: decimal;
+        padding-left: 1.25rem;
+      }
+      .note-editor li {
+        margin: 0.125rem 0;
+      }
+
+      /* Headline placeholder inside contenteditable */
+      .note-title[data-empty]::before {
+        content: attr(aria-placeholder);
+        color: #f0fdf4; /* minty tint on header */
+      }
+
+      /* Color palette popover */
+      .color-popover {
+        position: absolute;
+        z-index: 9999; /* above notes */
+        background: #fff;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
+        border-radius: 10px;
+        padding: 8px;
+        width: 220px;
+      }
+      .color-popover-grid {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 8px;
+      }
+      .color-swatch {
+        width: 24px;
+        height: 24px;
+        border-radius: 9999px;
+        border: 2px solid #fff;
+        box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.07);
+        cursor: pointer;
+      }
+      .color-popover-arrow {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        transform: rotate(45deg);
+        background: #fff;
+        border-left: 1px solid rgba(0, 0, 0, 0.08);
+        border-top: 1px solid rgba(0, 0, 0, 0.08);
+      }
+    </style>
+  </head>
+
+  <body class="bg-white min-h-screen">
+    <div class="flex items-center gap-3 mb-4" style=" padding-left: 1rem; padding-top: 1rem">
+  <span style="font-family: 'DM Mono', monospace; font-size: 0.75rem; letter-spacing: 0.12em; color: #101010;  text-transform: uppercase;">Try yourself here</span>
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#101010" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M5 12h14M13 6l6 6-6 6"/>
+  </svg>
+</div>
+    <!-- ===================== EMBEDDABLE NOTE BLOCK ===================== -->
+    <div class="note-block mx-auto max-w-5xl p-4">
+      <div class="flex items-start gap-6">
+        <!-- Stack -->
+        <div
+          id="note-stack"
+          class="relative w-48 h-48 shrink-0 cursor-pointer"
+          title="Click to pull a new sticky note"
+        >
+          <div
+            class="absolute inset-0 translate-x-1 translate-y-1 rotate-[5deg] rounded-sm bg-green-800 shadow"
+          ></div>
+          <div
+            class="absolute inset-0 -translate-x-0.5 translate-y-2 -rotate-[1.8deg] rounded-sm bg-green-600 shadow"
+          ></div>
+          <div
+            class="absolute inset-0 rounded-sm bg-green-100 shadow-lg border border-green-400 flex items-center justify-center"
+          >
+            <div class="text-center px-3">
+              <div class="font-semibold text-green-600">Sticky Note Stack</div>
+              <div class="text-sm text-gray-800">Click to add a note</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== NOTE TEMPLATE (cloned at runtime) ===================== -->
+    <template id="note-template">
+      <div
+        class="note fixed left-0 top-0 w-56 rounded-sm shadow-xl border border-green-600 bg-green-100 select-none flex flex-col"
+        style="z-index: 1;"
+      >
+        <!-- drag handle / headline -->
+        <div
+          class="note-header rounded-t-sm bg-green-600 text-white px-3 py-2 cursor-move flex items-center gap-2"
+        >
+          <!-- Visible editable headline inside the header -->
+          <div
+            contenteditable="true"
+            class="note-title flex-1 font-semibold outline-none whitespace-pre leading-snug min-h-[1.5rem]"
+            data-placeholder="Headline…"
+            aria-label="Note headline"
+          ></div>
+
+          <button
+            class="note-close shrink-0 rounded-lg text-green-100 hover:bg-green-600/20"
+            title="Delete note"
+            aria-label="Delete note"
+          >
+            ✕
+          </button>
+        </div>
+
+        <!-- content editable body -->
+        <div class="note-body p-3 flex-1 min-h-0 overflow-auto">
+          <div
+            class="note-editor prose prose-sm max-w-none outline-none min-h-[110px] bg-transparent"
+            contenteditable="true"
+            aria-label="Note text"
+            data-placeholder="Write something…"
+          ></div>
+
+          <!-- toolbar -->
+          <div class="mt-3 flex items-center gap-1 border-t border-neutral-700/30 pt-2">
+            <!-- Bold -->
+            <button
+              class="tb-btn tb-bold rounded-md p-1.5 hover:bg-green-200 size-8 flex items-center justify-center"
+              title="Bold (Ctrl/Cmd+B)"
+              aria-label="Bold"
+            >
+              <span class="font-bold">B</span>
+            </button>
+
+            <!-- Bulleted list icon -->
+            <button
+              class="tb-btn tb-ul rounded-md p-1.5 hover:bg-green-200"
+              title="Bulleted list"
+              aria-label="Bulleted list"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="size-5"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
+                />
+              </svg>
+            </button>
+
+            <!-- Numbered list icon -->
+            <button
+              class="tb-btn tb-ol rounded-md p-1.5 hover:bg-green-200"
+              title="Numbered list"
+              aria-label="Numbered list"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="size-5"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M8.242 5.992h12m-12 6.003H20.24m-12 5.999h12M4.117 7.495v-3.75H2.99m1.125 3.75H2.99m1.125 0H5.24m-1.92 2.577a1.125 1.125 0 1 1 1.591 1.59l-1.83 1.83h2.16M2.99 15.745h1.125a1.125 1.125 0 0 1 0 2.25H3.74m0-.002h.375a1.125 1.125 0 0 1 0 2.25H2.99"
+                />
+              </svg>
+            </button>
+
+            <!-- Color picker -->
+            <div class="ml-auto relative">
+              <button
+                class="tb-btn tb-color w-6 h-6 rounded-full border-2 border-white flex items-center justify-center"
+                title="Change color"
+                aria-label="Change color"
+              >
+                <span
+                  class="current-color-indicator inline-block w-4 h-4 rounded-full"
+                  style="background:#16A34A"
+                ></span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <script>
+      // -------- helpers ---------
+      const uid = () => Math.random().toString(36).slice(2);
+      let zCounter = 10; // bring-to-front order
+
+      const viewport = () => ({
+        vw: window.innerWidth || document.documentElement.clientWidth,
+        vh: window.innerHeight || document.documentElement.clientHeight,
+      });
+
+      const clamp = (val, min, max) => Math.min(Math.max(val, min), max);
+
+      function placeNoteWithinViewport(note) {
+        // ensure note is within bounds when created
+        const { vw, vh } = viewport();
+        const rect = note.getBoundingClientRect();
+        const maxX = Math.max(0, vw - rect.width);
+        const maxY = Math.max(0, vh - rect.height);
+        const pad = 24;
+        const x = clamp(Math.random() * (vw - rect.width - pad) + pad, 0, maxX);
+        const y = clamp(Math.random() * (vh - rect.height - pad) + pad, 0, maxY);
+        note.style.left = x + "px";
+        note.style.top = y + "px";
+        note.style.zIndex = ++zCounter;
+      }
+
+      function placeNoteBesideStack(note) {
+        // Position first note adjacent to the stack without covering it.
+        const stack = document.getElementById("note-stack");
+        const rectStack = stack.getBoundingClientRect();
+        const gap = 32; // keep a clear gap
+
+        // Let the note be at least as tall as the stack, but able to grow with content
+        note.style.minHeight = rectStack.height + "px";
+
+        const { vw, vh } = viewport();
+        const tmpRect = note.getBoundingClientRect();
+        const noteW = tmpRect.width || 320;
+        const noteH = Math.max(tmpRect.height || 0, rectStack.height);
+
+        // Prefer right side
+        let nx = rectStack.right + gap;
+        let ny = rectStack.top;
+
+        // If not enough space on right, try left; else place below
+        const spaceRight = vw - (rectStack.right + gap);
+        if (spaceRight < noteW) {
+          const leftCandidate = rectStack.left - gap - noteW;
+          if (leftCandidate >= 0) {
+            nx = leftCandidate;
+            ny = rectStack.top;
+          } else {
+            nx = Math.max(0, rectStack.left);
+            ny = Math.min(vh - noteH, rectStack.bottom + gap);
+          }
+        }
+
+        // Clamp fully on-screen
+        nx = clamp(nx, 0, Math.max(0, vw - noteW));
+        ny = clamp(ny, 0, Math.max(0, vh - noteH));
+
+        note.style.left = nx + "px";
+        note.style.top = ny + "px";
+        note.style.zIndex = ++zCounter;
+      }
+
+      function keepNoteInBounds(note) {
+        const { vw, vh } = viewport();
+        const rect = note.getBoundingClientRect();
+        const nx = clamp(rect.left, 0, Math.max(0, vw - rect.width));
+        const ny = clamp(rect.top, 0, Math.max(0, vh - rect.height));
+        note.style.left = nx + "px";
+        note.style.top = ny + "px";
+      }
+
+      function makeDraggable(note) {
+        const header = note.querySelector(".note-header");
+        let dragging = false,
+          startX = 0,
+          startY = 0,
+          initX = 0,
+          initY = 0,
+          w = 0,
+          h = 0;
+
+        const onPointerDown = (e) => {
+          if (e.button !== undefined && e.button !== 0) return;
+          dragging = true;
+          note.classList.add("dragging");
+          note.style.zIndex = ++zCounter;
+
+          const p = e.touches ? e.touches[0] : e;
+          startX = p.clientX;
+          startY = p.clientY;
+
+          const rect = note.getBoundingClientRect();
+          initX = rect.left;
+          initY = rect.top;
+          w = rect.width;
+          h = rect.height;
+
+          window.addEventListener("pointermove", onPointerMove);
+          window.addEventListener("pointerup", onPointerUp, { once: true });
+        };
+
+        const onPointerMove = (e) => {
+          if (!dragging) return;
+          const p = e.touches ? e.touches[0] : e;
+          const dx = p.clientX - startX;
+          const dy = p.clientY - startY;
+
+          let nx = initX + dx;
+          let ny = initY + dy;
+
+          const { vw, vh } = viewport();
+          // clamp so the entire note stays visible, not crossing page edges
+          nx = clamp(nx, 0, Math.max(0, vw - w));
+          ny = clamp(ny, 0, Math.max(0, vh - h));
+
+          note.style.left = nx + "px";
+          note.style.top = ny + "px";
+        };
+
+        const onPointerUp = () => {
+          dragging = false;
+          note.classList.remove("dragging");
+          window.removeEventListener("pointermove", onPointerMove);
+        };
+
+        header.addEventListener("pointerdown", onPointerDown);
+      }
+
+      function bindToolbar(note) {
+        const editor = note.querySelector(".note-editor");
+
+        // Placeholder behavior for contenteditable (headline + editor)
+        function applyPlaceholder(el) {
+          const ph = el.getAttribute("data-placeholder");
+          if (!ph) return;
+          const update = () => {
+            if (el.textContent.trim() === "") {
+              el.classList.add("text-zinc-700");
+              el.setAttribute("data-empty", "");
+              el.setAttribute("aria-placeholder", ph);
+            } else {
+              el.classList.remove("text-zinc-700");
+              el.removeAttribute("data-empty");
+              el.removeAttribute("aria-placeholder");
+            }
+          };
+          el.addEventListener("input", update);
+          update();
+        }
+
+        const titleEl = note.querySelector(".note-title");
+        applyPlaceholder(titleEl);
+        applyPlaceholder(editor);
+
+        [editor, titleEl].forEach((el) => {
+          el.addEventListener("focus", () => (note.style.zIndex = ++zCounter));
+        });
+
+        function exec(cmd) {
+          editor.focus();
+          document.execCommand(cmd, false);
+          fixListStyling(editor);
+        }
+
+        note.querySelector(".tb-bold").addEventListener("click", () => exec("bold"));
+        note
+          .querySelector(".tb-ul")
+          .addEventListener("click", () => exec("insertUnorderedList"));
+        note
+          .querySelector(".tb-ol")
+          .addEventListener("click", () => exec("insertOrderedList"));
+
+        // Keyboard: bold
+        note.addEventListener("keydown", (e) => {
+          if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "b") {
+            e.preventDefault();
+            exec("bold");
+          }
+        });
+
+        // Delete note
+        note.querySelector(".note-close").addEventListener("click", () => {
+          note.remove();
+        });
+      }
+
+      function fixListStyling(root) {
+        root.querySelectorAll("ul").forEach((ul) => {
+          ul.style.listStyle = "disc";
+          ul.style.paddingLeft = "1.25rem";
+        });
+        root.querySelectorAll("ol").forEach((ol) => {
+          ol.style.listStyle = "decimal";
+          ol.style.paddingLeft = "1.25rem";
+        });
+      }
+
+      function createNote({ besideStack = false } = {}) {
+        const tpl = document.getElementById("note-template");
+        const node = tpl.content.firstElementChild.cloneNode(true);
+        node.dataset.id = uid();
+        document.body.appendChild(node); // append first so size is measurable
+
+        if (besideStack) {
+          placeNoteBesideStack(node);
+        } else {
+          placeNoteWithinViewport(node);
+        }
+
+        makeDraggable(node);
+        bindToolbar(node);
+        return node;
+      }
+
+      // ---- Block wiring ----
+      const stackEl = document.getElementById("note-stack");
+      stackEl.addEventListener("click", () => {
+        const isFirst = document.querySelectorAll(".note").length === 0;
+        const note = createNote({ besideStack: isFirst }); // first note pops beside the stack
+        fixListStyling(note.querySelector(".note-editor"));
+      });
+
+      // Optional: guards for non-existents (prevent errors if these IDs missing)
+      const addBtn = document.getElementById("add-note");
+      if (addBtn) addBtn.addEventListener("click", () => createNote());
+      const clearBtn = document.getElementById("clear-notes");
+      if (clearBtn)
+        clearBtn.addEventListener("click", () => {
+          document.querySelectorAll(".note").forEach((n) => n.remove());
+        });
+
+      // Keep all notes in bounds on resize/rotation
+      window.addEventListener("resize", () => {
+        document.querySelectorAll(".note").forEach(keepNoteInBounds);
+      });
+
+      // ====== COLOR SWITCH ======
+      // Vorgaben: Orange, Rot, Gelb, Grün, Blau, Violett
+      const PALETTE_COLORS = [
+        "#EA580C",
+        "#B91C1C",
+        "#FBBC05",
+        "#16A34A",
+        "#1D4ED8",
+        "#6D28D9",
+      ];
+      const DEFAULT_NOTE_COLOR = "#16A34A"; // current green
+
+      // Helpers: derive tints/lines
+      function withAlpha(hex, alpha) {
+        const v = hex.replace("#", "");
+        const r = parseInt(v.substring(0, 2), 16);
+        const g = parseInt(v.substring(2, 4), 16);
+        const b = parseInt(v.substring(4, 6), 16);
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+      }
+
+      function lighten(hex, amt = 0.9) {
+        const v = hex.replace("#", "");
+        let r = parseInt(v.substring(0, 2), 16);
+        let g = parseInt(v.substring(2, 4), 16);
+        let b = parseInt(v.substring(4, 6), 16);
+        const mix = (c) => Math.round(c + (255 - c) * amt);
+        r = mix(r);
+        g = mix(g);
+        b = mix(b);
+        return `rgb(${r}, ${g}, ${b})`;
+      }
+
+      function midline(hex, amt = 0.35) {
+        const v = hex.replace("#", "");
+        let r = parseInt(v.substring(0, 2), 16);
+        let g = parseInt(v.substring(2, 4), 16);
+        let b = parseInt(v.substring(4, 6), 16);
+        const mix = (c) => Math.round(c * (1 - amt) + 120 * amt);
+        r = mix(r);
+        g = mix(g);
+        b = mix(b);
+        return `rgb(${r}, ${g}, ${b})`;
+      }
+
+      function applyNoteColor(note, hex) {
+        const header = note.querySelector(".note-header");
+        const body = note.querySelector(".note-body");
+        const indicator = note.querySelector(".current-color-indicator");
+
+        // Primary color
+        header.style.backgroundColor = hex;
+        header.style.color = "#ffffff";
+
+        // Card
+        note.style.borderColor = midline(hex, 0.25);
+        note.style.backgroundColor = lighten(hex, 0.92); // very light tint
+
+        // Body divider
+        body.style.borderTopColor = midline(hex, 0.35);
+
+        // Toolbar hover states
+        note.querySelectorAll(".tb-btn").forEach((btn) => {
+          btn.onmouseenter = () => (btn.style.backgroundColor = withAlpha(hex, 0.12));
+          btn.onmouseleave = () => (btn.style.backgroundColor = "");
+        });
+
+        // Indicator
+        if (indicator) indicator.style.backgroundColor = hex;
+
+        // Persist color on node
+        note.dataset.color = hex;
+      }
+
+      function openColorPopover({ forButton, onPick }) {
+        closeAnyOpenPopover();
+
+        const pop = document.createElement("div");
+        pop.className = "color-popover";
+        pop.setAttribute("role", "dialog");
+        pop.setAttribute("aria-label", "Color picker");
+
+        // Content
+        const grid = document.createElement("div");
+        grid.className = "color-popover-grid";
+        PALETTE_COLORS.forEach((hex) => {
+          const sw = document.createElement("button");
+          sw.type = "button";
+          sw.className = "color-swatch";
+          sw.style.background = hex;
+          sw.title = hex;
+          sw.addEventListener("click", (e) => {
+            e.stopPropagation();
+            onPick(hex);
+            closeAnyOpenPopover();
+          });
+          grid.appendChild(sw);
+        });
+        pop.appendChild(grid);
+
+        // Arrow
+        const arrow = document.createElement("div");
+        arrow.className = "color-popover-arrow";
+        pop.appendChild(arrow);
+
+        document.body.appendChild(pop);
+
+        // Position (prefer above)
+        positionPopover(forButton, pop, arrow);
+
+        // Close handlers
+        const onDocClick = (e) => {
+          if (!pop.contains(e.target) && e.target !== forButton) closeAnyOpenPopover();
+        };
+        const onKey = (e) => {
+          if (e.key === "Escape") closeAnyOpenPopover();
+        };
+        const onScrollOrResize = () => positionPopover(forButton, pop, arrow);
+
+        document.addEventListener("click", onDocClick, { capture: true });
+        window.addEventListener("keydown", onKey);
+        window.addEventListener("scroll", onScrollOrResize, { passive: true });
+        window.addEventListener("resize", onScrollOrResize);
+
+        pop._cleanup = () => {
+          document.removeEventListener("click", onDocClick, { capture: true });
+          window.removeEventListener("keydown", onKey);
+          window.removeEventListener("scroll", onScrollOrResize);
+          window.removeEventListener("resize", onScrollOrResize);
+          pop.remove();
+        };
+
+        window.__OPEN_COLOR_POPOVER__ = pop;
+      }
+
+      function closeAnyOpenPopover() {
+        const open = window.__OPEN_COLOR_POPOVER__;
+        if (open && open._cleanup) {
+          open._cleanup();
+          window.__OPEN_COLOR_POPOVER__ = null;
+        }
+      }
+
+      function positionPopover(anchorBtn, pop, arrow) {
+        const vw = window.innerWidth || document.documentElement.clientWidth;
+        const vh = window.innerHeight || document.documentElement.clientHeight;
+        const br = anchorBtn.getBoundingClientRect();
+
+        // Make visible to measure
+        pop.style.visibility = "hidden";
+        pop.style.left = "0px";
+        pop.style.top = "0px";
+        pop.style.maxWidth = "min(260px, 92vw)";
+        pop.style.maxHeight = "min(300px, 80vh)";
+        pop.style.overflow = "hidden";
+
+        const { width: pw, height: ph } = pop.getBoundingClientRect();
+        const gap = 10;
+
+        let top = br.top - ph - gap; // prefer above
+        let left = br.left + br.width / 2 - pw / 2;
+
+        // Clamp horizontally
+        left = Math.max(8, Math.min(left, vw - pw - 8));
+
+        // If not enough space above, place below
+        const fitsTop = top >= 8;
+        if (!fitsTop) top = br.bottom + gap;
+
+        // Keep within viewport vertically
+        if (top + ph > vh - 8) {
+          top = Math.max(8, vh - ph - 8);
+        }
+
+        pop.style.left = `${Math.round(left)}px`;
+        pop.style.top = `${Math.round(top)}px`;
+        pop.style.visibility = "visible";
+
+        // Arrow position
+        const popRect = pop.getBoundingClientRect();
+        const centerX = br.left + br.width / 2;
+        const arrowSize = 10;
+        arrow.style.left = `${Math.round(centerX - popRect.left - arrowSize / 2)}px`;
+        arrow.style.top = fitsTop ? `${ph - 5}px` : `-5px`;
+      }
+
+      function wireColorButton(note) {
+        const btn = note.querySelector(".tb-color");
+        if (!btn) return;
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const onPick = (hex) => {
+            applyNoteColor(note, hex);
+          };
+          openColorPopover({ forButton: btn, onPick });
+        });
+      }
+
+      function initNoteColor(note) {
+        const hasColor = note.dataset.color;
+        applyNoteColor(note, hasColor || DEFAULT_NOTE_COLOR);
+        wireColorButton(note);
+      }
+
+      // Patch: after createNote, initialize color
+      const __orig_createNote = createNote;
+      createNote = function (opts = {}) {
+        const node = __orig_createNote(opts);
+        initNoteColor(node);
+        return node;
+      };
+    </script>
+  </body>
+</html>

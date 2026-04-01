@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ecaria — Case Study | Rika.</title>
+  <meta name="description" content="Full UX case study: ecaria Care Compass — accessibility-first UX for families navigating care decisions under pressure. WCAG 2.1, guided flows, healthcare design.">
+  <meta name="robots" content="noindex, nofollow">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;0,900;1,400;1,700;1,900&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            playfair: ['"Playfair Display"', 'serif'],
+            mono:     ['"DM Mono"', 'monospace'],
+            syne:     ['Syne', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    html { scroll-behavior: smooth; }
+
+    /* ── shared tokens ── */
+    :root {
+      --teal:    #0aaba4;
+      --teal-bg: rgba(10,171,164,0.08);
+      --teal-bg2:rgba(10,171,164,0.15);
+      --border:  #2e2e2e;
+      --sub:     #1a1a1a;
+      --surface: #141414;
+      --bg:      #111111;
+      --text:    #e8e8e8;
+      --muted:   #888888;
+      --dim:     #555555;
+    }
+
+    /* ── nav (identical to main site) ── */
+    .nav-pill {
+      background: rgba(255,255,255,0.02);
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
+      box-shadow: 0px -2px 6px rgba(0,0,0,0.16), inset 0px 2px 8px rgba(255,255,255,0.36);
+    }
+    .nav-link {
+      font-family: 'DM Mono', monospace;
+      font-size: 13px; letter-spacing: -0.03px;
+      color: #fff; padding: 8px 16px;
+      transition: color .2s; white-space: nowrap;
+    }
+    .nav-link:hover, .nav-link.active { color: var(--teal); }
+
+    /* ── shared components ── */
+    .section-label { font-family:'DM Mono',monospace; font-size:12px; letter-spacing:2.08px; text-transform:uppercase; color:var(--dim); }
+    .divider       { width:80px; height:1px; background:var(--border); display:inline-block; flex-shrink:0; }
+    .tag           { font-family:'DM Mono',monospace; font-size:12px; letter-spacing:0.992px; text-transform:uppercase; border:1px solid var(--border); color:var(--muted); padding:4px 15px; height:27px; display:inline-flex; align-items:center; white-space:nowrap; }
+    .tag-teal      { font-family:'DM Mono',monospace; font-size:12px; letter-spacing:0.928px; text-transform:uppercase; border:1px solid rgba(200,191,176,0.25); color:var(--teal); padding:3px 10px; height:22px; display:inline-flex; align-items:center; white-space:nowrap; }
+    .cs-pill       { font-family:'DM Mono',monospace; font-size:12px; letter-spacing:.5px; text-transform:uppercase; border:1px solid var(--border); color:var(--dim); padding:4px 12px; border-radius:999px; white-space:nowrap; display:inline-flex; align-items:center; }
+    .btn-teal      { background:var(--teal-bg); border:1px solid var(--teal); color:var(--teal); font-family:'DM Mono',monospace; font-size:13px; letter-spacing:1.382px; text-transform:uppercase; padding:10px 16px; display:inline-flex; align-items:center; transition:background .2s; }
+    .btn-teal:hover { background:var(--teal-bg2); }
+    .btn-ghost     { background:transparent; border:1px solid var(--border); color:var(--muted); font-family:'DM Mono',monospace; font-size:13px; letter-spacing:1.382px; text-transform:uppercase; padding:10px 16px; display:inline-flex; align-items:center; transition:all .2s; }
+    .btn-ghost:hover { border-color:var(--teal); color:var(--teal); }
+    .border-card   { background:linear-gradient(133deg,rgba(232,224,208,0.008) 67%,rgba(232,224,208,0) 100%); border:1px solid var(--border); }
+
+    /* ── typography hero sizes ── */
+    .cs-hero-title {
+      font-family: 'Playfair Display', serif;
+      font-weight: 900;
+      font-size: clamp(2.8rem, 6vw, 7rem);
+      line-height: 0.93;
+      letter-spacing: -2px;
+    }
+
+    /* ── Large editorial number ── */
+    .editorial-num {
+      font-family: 'Playfair Display', serif;
+      font-weight: 900;
+      font-style: italic;
+      line-height: 1;
+      letter-spacing: -4px;
+      color: #f2f2f2;
+    }
+
+    /* ── Pull quote ── */
+    .pull-quote {
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      font-style: italic;
+      color: #f2f2f2;
+      line-height: 1.15;
+    }
+
+    /* ── Principle card ── */
+    .principle-card {
+      border-top: 2px solid var(--teal);
+      background: #141414;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      transition: background .3s;
+    }
+    .principle-card:hover { background: #1a1a1a; }
+
+    /* ── WCAG badge ── */
+    .wcag-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--teal);
+      padding: 6px 14px;
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--teal);
+    }
+
+    /* ── Step indicator ── */
+    .step-ghost {
+      font-family: 'Playfair Display', serif;
+      font-weight: 900;
+      font-style: italic;
+      font-size: clamp(3rem, 8vw, 6.5rem);
+      color: rgba(255,255,255,0.035);
+      line-height: 1;
+      letter-spacing: -2px;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    /* ── Horizontal rule teal ── */
+    .hr-teal { height:1px; background: linear-gradient(to right, var(--teal), transparent); border:none; margin:0; }
+
+    /* ── Read progress ── */
+    #read-progress { position:fixed; top:0; left:0; height:2px; background:var(--teal); z-index:9999; width:0%; transition:width .1s linear; }
+
+    /* ── Reveal ── */
+    .reveal { opacity:0; transform:translateY(24px); }
+
+    /* ── Full-bleed text banner ── */
+    .text-banner {
+      overflow: hidden;
+      white-space: nowrap;
+      font-family: 'Playfair Display', serif;
+      font-weight: 900;
+      font-style: italic;
+      color: rgba(255,255,255,0.04);
+      line-height: 1;
+      letter-spacing: -4px;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    /* ── Mobile ── */
+    @media (max-width: 768px) {
+      .cs-hero-title  { letter-spacing:-1px; }
+      .editorial-num  { letter-spacing:-2px; }
+      .tag,.tag-teal  { font-size:12px !important; height:auto !important; padding:5px 10px !important; }
+      .cs-pill        { font-size:12px !important; padding:4px 10px !important; }
+      .section-label  { font-size:12px !important; }
+      .text-banner    { display:none; }
+      .mobile-hide    { display:none !important; }
+    }
+  </style>
+</head>
+<body class="bg-[#111] text-white overflow-x-hidden">
+
+  <div id="read-progress"></div>
+
+  <!-- ══════════════════════════════════════
+       NAV
+  ══════════════════════════════════════ -->
+  <nav id="main-nav" class="fixed top-0 left-0 right-0 z-50 bg-[rgba(17,17,17,0.92)] backdrop-blur-md border-b border-[#2e2e2e]">
+    <div class="flex items-center justify-between px-6 md:px-12 h-[70px]">
+      <a href="index.html" class="font-playfair font-bold text-[22px] text-[#f2f2f2] tracking-[0.45px] hover:text-[#0aaba4] transition-colors shrink-0">Rika.</a>
+      <div class="nav-pill rounded-[63px] hidden md:flex items-center px-1 py-1 gap-0.5">
+        <a href="index.html#about"   class="nav-link">ABOUT</a>
+        <a href="index.html#work"    class="nav-link">WORK</a>
+        <a href="index.html#lab"     class="nav-link">THE LAB</a>
+        <a href="index.html#skills"  class="nav-link">SKILLS</a>
+      </div>
+      <div class="flex items-center gap-4">
+        <a href="index.html#work" class="hidden md:flex items-center gap-2 font-mono text-[11px] text-[#555] hover:text-[#0aaba4] transition-colors tracking-[1px] uppercase">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 6l-6 6 6 6"/></svg>
+          All Work
+        </a>
+        <a href="index.html#contact" class="hidden md:inline-flex items-center" style="border:1px solid #0aaba4;color:#0aaba4;padding:8px 20px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;background:transparent;cursor:pointer;transition:background 0.2s ease,color 0.2s ease;text-decoration:none;" onmouseover="this.style.background='#0aaba4';this.style.color='#111111'" onmouseout="this.style.background='transparent';this.style.color='#0aaba4'">CONTACT</a>
+        <button id="hamburger" class="md:hidden flex flex-col gap-[5px] p-2" aria-label="Open menu">
+          <span class="block w-6 h-px bg-[#f2f2f2] transition-all"></span>
+          <span class="block w-6 h-px bg-[#f2f2f2] transition-all"></span>
+          <span class="block w-4 h-px bg-[#f2f2f2] transition-all"></span>
+        </button>
+      </div>
+    </div>
+    <div id="mobile-menu" style="display:none;" class="md:hidden flex-col bg-[#111] border-t border-[#2e2e2e] px-6 py-4 gap-1">
+      <a href="index.html#about"   class="nav-link block py-3 border-b border-[#1e1e1e]">ABOUT</a>
+      <a href="index.html#work"    class="nav-link block py-3 border-b border-[#1e1e1e]">WORK</a>
+      <a href="index.html#lab"     class="nav-link block py-3 border-b border-[#1e1e1e]">THE LAB</a>
+      <a href="index.html#skills"  class="nav-link block py-3 border-b border-[#1e1e1e]">SKILLS</a>
+      <a href="index.html#contact" class="nav-link block py-3">CONTACT</a>
+    </div>
+  </nav>
+
+  <!-- ══════════════════════════════════════
+       HERO — full typographic
+  ══════════════════════════════════════ -->
+  <section style="background:#000; min-height:100vh; padding-top:70px; position:relative; overflow:hidden; display:flex; flex-direction:column; justify-content:flex-end;">
+
+    <!-- Subtle gradient -->
+    <div aria-hidden="true" style="position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 30% 40%,rgba(10,171,164,0.05) 0%,transparent 70%);pointer-events:none;"></div>
+
+    <!-- Watermark text top -->
+    <div class="text-banner" aria-hidden="true"
+         style="position:absolute;top:80px;left:-20px;font-size:clamp(6rem,18vw,16rem);">
+      ACCESSIBILITY&nbsp;&nbsp;ACCESSIBILITY
+    </div>
+
+    <div class="max-w-[1760px] mx-auto px-6 md:px-12 w-full pb-16 md:pb-24" style="position:relative;z-index:2;">
+
+      <!-- Breadcrumb -->
+      <div class="flex items-center gap-3 mb-10 reveal">
+        <a href="index.html#work" class="font-mono text-[11px] text-[#555] hover:text-[#0aaba4] transition-colors tracking-[1.5px] uppercase flex items-center gap-2">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 6l-6 6 6 6"/></svg>
+          Work
+        </a>
+        <span class="text-[#333]">/</span>
+        <span class="font-mono text-[11px] text-[#555] tracking-[1.5px] uppercase">ecaria GmbH</span>
+      </div>
+
+      <!-- Meta -->
+      <div class="flex items-center gap-4 flex-wrap mb-10 reveal">
+        <span style="font-family:'DM Mono',monospace;font-size:12px;color:#555;letter-spacing:1.87px;text-transform:uppercase;">ecaria GmbH</span>
+        <span style="font-family:'DM Mono',monospace;font-size:12px;color:#444;">2021 — 2022</span>
+        <div class="flex gap-2 flex-wrap">
+          <span class="cs-pill">Healthcare UX</span>
+          <span class="cs-pill">Accessibility</span>
+          <span class="cs-pill">Mobile First</span>
+          <span class="cs-pill">Research</span>
+          <span class="cs-pill">Guided Flow</span>
+        </div>
+      </div>
+
+      <!-- Headline -->
+      <div class="reveal mb-8">
+        <h1 class="cs-hero-title text-[#e8e8e8]">
+          The Care<br>
+          <em class="italic" style="color:#0aaba4;">Compass.</em>
+        </h1>
+      </div>
+
+      <!-- Tagline -->
+      <p class="reveal font-mono italic text-[12px] md:text-[13px] text-[#0aaba4] tracking-[0.5px] mb-14" style="max-width:560px;line-height:1.7;">
+        Designing calm into crisis — accessibility-first UX for families navigating care decisions under pressure.
+      </p>
+
+      <!-- Stats row -->
+      <div class="reveal grid grid-cols-2 md:grid-cols-4 gap-0 border-t border-b border-[#1e1e1e]">
+        <div class="py-8 md:pr-8 md:border-r border-[#1e1e1e]">
+          <div class="font-playfair font-bold italic text-[#f2f2f2] leading-none mb-3" style="font-size:clamp(2rem,4vw,3rem);">↓ Overwhelm</div>
+          <div class="font-mono text-[9px] text-[#555] tracking-[1.5px] uppercase leading-[1.6]">Significant reduction in<br>cognitive overload</div>
+        </div>
+        <div class="py-8 md:px-8 md:border-r border-[#1e1e1e]">
+          <div class="font-playfair font-bold italic text-[#f2f2f2] leading-none mb-3" style="font-size:clamp(2rem,4vw,3rem);">1</div>
+          <div class="font-mono text-[9px] text-[#555] tracking-[1.5px] uppercase leading-[1.6]">Decision per screen —<br>radical guided flow</div>
+        </div>
+        <div class="py-8 md:px-8 md:border-r border-[#1e1e1e]">
+          <div class="font-playfair font-bold italic text-[#f2f2f2] leading-none mb-3" style="font-size:clamp(2rem,4vw,3rem);">0</div>
+          <div class="font-mono text-[9px] text-[#555] tracking-[1.5px] uppercase leading-[1.6]">Onboarding required<br>for new users</div>
+        </div>
+        <div class="py-8 md:pl-8">
+          <div class="font-playfair font-bold italic text-[#f2f2f2] leading-none mb-3" style="font-size:clamp(2rem,4vw,3rem);">WCAG</div>
+          <div class="font-mono text-[9px] text-[#555] tracking-[1.5px] uppercase leading-[1.6]">2.1 AA compliant<br>throughout</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       CONTEXT & CHALLENGE
+  ══════════════════════════════════════ -->
+  <section id="context" style="background:#111;padding:6rem 0;border-bottom:1px solid #1a1a1a;">
+    <div class="max-w-[1760px] mx-auto px-6 md:px-12">
+
+      <div class="flex items-center gap-4 mb-12 reveal">
+        <span class="section-label">01 — Context & Challenge</span>
+        <div class="divider"></div>
+      </div>
+
+      <!-- Pull quote — full width -->
+      <div class="reveal mb-16 border-l-2 pl-8 md:pl-12" style="border-color:#0aaba4;">
+        <p class="pull-quote" style="font-size:clamp(1.5rem,3.5vw,3rem);max-width:820px;">
+          "When a family member needs care, the last thing they should face is a confusing digital interface."
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-12 md:gap-20 items-start">
+
+        <div class="reveal flex flex-col gap-6">
+          <h2 class="font-playfair font-bold text-[#f2f2f2] leading-[1.1]" style="font-size:clamp(1.7rem,3vw,2.6rem);">
+            The problem was<br>emotional before it was<br>
+            <em class="italic" style="color:#0aaba4;">digital.</em>
+          </h2>
+          <div class="flex flex-col gap-4 font-mono text-[12px] text-[#888] leading-[1.9]">
+            <p>ecaria builds digital tools for people navigating Germany's complex care system — one of the most legislation-heavy, emotionally charged decision environments imaginable. The users aren't browsing casually. They're often in crisis.</p>
+            <p>The core challenge: complex legal care regulations, multiple decision paths, and a target audience of elderly users and families under high stress, most with limited digital experience — all navigating on a mobile device, often for the very first time.</p>
+            <p>A confusing interface here doesn't just cause frustration. It causes abandonment at exactly the moment a family most needs guidance. The UX had to earn trust before it asked for anything.</p>
+          </div>
+        </div>
+
+        <!-- User group cards -->
+        <div class="reveal flex flex-col gap-3">
+          <p class="font-mono text-[10px] text-[#555] tracking-[2px] uppercase mb-2">Target Audience</p>
+
+          <div class="border-card p-6 flex flex-col gap-3">
+            <div class="flex items-start justify-between gap-4">
+              <span class="font-syne font-bold text-[14px] text-[#f2f2f2]">Elderly Users</span>
+              <span class="tag-teal">Primary</span>
+            </div>
+            <p class="font-mono text-[11px] text-[#666] leading-[1.8]">Often first-time smartphone users. Need large click targets, high contrast, plain language, and zero ambiguity at every step. Error states must feel safe, not punishing.</p>
+          </div>
+
+          <div class="border-card p-6 flex flex-col gap-3">
+            <div class="flex items-start justify-between gap-4">
+              <span class="font-syne font-bold text-[14px] text-[#f2f2f2]">Family Caregivers</span>
+              <span class="tag-teal">Primary</span>
+            </div>
+            <p class="font-mono text-[11px] text-[#666] leading-[1.8]">Managing care decisions while also managing their own lives. High cognitive load, limited patience for anything unclear. Need fast orientation, confident guidance, and reassurance built into every flow.</p>
+          </div>
+
+          <div class="border-card p-6 flex flex-col gap-3">
+            <div class="flex items-start justify-between gap-4">
+              <span class="font-syne font-bold text-[14px] text-[#f2f2f2]">Low Digital Literacy</span>
+              <span class="tag-teal">Universal</span>
+            </div>
+            <p class="font-mono text-[11px] text-[#666] leading-[1.8]">Design for this group and you design for everyone. No assumed knowledge, no jargon, no hidden affordances. The interface has to be self-explanatory — no onboarding document will be read.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       DESIGN PRINCIPLES — typography-led
+  ══════════════════════════════════════ -->
+  <section id="principles" style="background:#0d0d0d;padding:6rem 0;border-bottom:1px solid #1a1a1a;overflow:hidden;position:relative;">
+
+    <!-- Background watermark -->
+    <div class="text-banner" aria-hidden="true"
+         style="position:absolute;bottom:-20px;right:-20px;font-size:clamp(5rem,15vw,13rem);text-align:right;">
+      CALM&nbsp;&nbsp;CLEAR&nbsp;&nbsp;CALM
+    </div>
+
+    <div class="max-w-[1760px] mx-auto px-6 md:px-12" style="position:relative;z-index:1;">
+
+      <div class="flex items-center gap-4 mb-12 reveal">
+        <span class="section-label">02 — Design Principles</span>
+        <div class="divider"></div>
+      </div>
+
+      <h2 class="font-playfair font-bold text-[#f2f2f2] leading-[1.1] mb-16 reveal" style="font-size:clamp(1.7rem,3vw,2.6rem);max-width:500px;">
+        Three rules that governed<br>every single decision.
+      </h2>
+
+      <div class="grid md:grid-cols-3 gap-2 reveal">
+
+        <!-- Principle 1 -->
+        <div class="principle-card">
+          <div class="flex items-start justify-between gap-4">
+            <span class="editorial-num" style="font-size:clamp(3rem,5vw,4.5rem);color:rgba(10,171,164,0.2);">01</span>
+            <span class="wcag-badge">WCAG 2.1</span>
+          </div>
+          <h3 class="font-syne font-bold text-[16px] md:text-[18px] text-[#f2f2f2]">One decision<br>per screen.</h3>
+          <p class="font-mono text-[11px] text-[#666] leading-[1.85]">Never ask a user to process two things at once. Every screen presents a single question with a single clear action. Branching logic happens in the IA, invisibly — the user only ever sees the next step.</p>
+          <hr class="hr-teal mt-auto" style="opacity:0.3;">
+          <p class="font-mono text-[10px] text-[#555] tracking-[1px] uppercase">Guided Flow Principle</p>
+        </div>
+
+        <!-- Principle 2 -->
+        <div class="principle-card">
+          <div class="flex items-start justify-between gap-4">
+            <span class="editorial-num" style="font-size:clamp(3rem,5vw,4.5rem);color:rgba(10,171,164,0.2);">02</span>
+            <span class="wcag-badge">AA+</span>
+          </div>
+          <h3 class="font-syne font-bold text-[16px] md:text-[18px] text-[#f2f2f2]">Large targets.<br>Always.</h3>
+          <p class="font-mono text-[11px] text-[#666] leading-[1.85]">Minimum 44×44px touch targets across every interactive element — not just buttons. Tap areas extend beyond visible borders. For users with reduced motor precision, every missed tap is a broken experience.</p>
+          <hr class="hr-teal mt-auto" style="opacity:0.3;">
+          <p class="font-mono text-[10px] text-[#555] tracking-[1px] uppercase">Motor Accessibility</p>
+        </div>
+
+        <!-- Principle 3 -->
+        <div class="principle-card">
+          <div class="flex items-start justify-between gap-4">
+            <span class="editorial-num" style="font-size:clamp(3rem,5vw,4.5rem);color:rgba(10,171,164,0.2);">03</span>
+            <span class="wcag-badge">Plain Language</span>
+          </div>
+          <h3 class="font-syne font-bold text-[16px] md:text-[18px] text-[#f2f2f2]">Plain language.<br>No jargon.</h3>
+          <p class="font-mono text-[11px] text-[#666] leading-[1.85]">Every label, heading, and instruction was reviewed against plain language standards and tested with real caregivers. Legal care terminology was rewritten into human language without losing legal accuracy.</p>
+          <hr class="hr-teal mt-auto" style="opacity:0.3;">
+          <p class="font-mono text-[10px] text-[#555] tracking-[1px] uppercase">Cognitive Accessibility</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       PROCESS — typographic steps
+  ══════════════════════════════════════ -->
+  <section id="process" style="background:#111;padding:6rem 0;border-bottom:1px solid #1a1a1a;">
+    <div class="max-w-[1760px] mx-auto px-6 md:px-12">
+
+      <div class="flex items-center gap-4 mb-12 reveal">
+        <span class="section-label">03 — The Process</span>
+        <div class="divider"></div>
+      </div>
+
+      <h2 class="font-playfair font-bold text-[#f2f2f2] leading-[1.1] mb-16 reveal" style="font-size:clamp(1.7rem,3vw,2.6rem);max-width:500px;">
+        Designed by listening.<br>
+        <em class="italic" style="color:#0aaba4;">Refined by testing.</em>
+      </h2>
+
+      <!-- Steps -->
+      <div class="flex flex-col gap-0">
+
+        <!-- Step 01 -->
+        <div class="reveal border-t border-[#1a1a1a] py-10 grid md:grid-cols-[1fr_2fr_1fr] gap-8 items-start">
+          <div>
+            <div class="step-ghost">01</div>
+          </div>
+          <div class="flex flex-col gap-4">
+            <h3 class="font-syne font-bold text-[16px] text-[#f2f2f2]">User Research & Caregiver Interviews</h3>
+            <p class="font-mono text-[12px] text-[#888] leading-[1.9]">I started by interviewing actual caregivers — not proxies or personas built from assumptions. The sessions revealed that the primary barrier wasn't digital literacy: it was emotional overwhelm. Users weren't failing to understand the interface; they were too stressed to focus on it. That insight reframed the entire design problem.</p>
+            <p class="font-mono text-[12px] text-[#888] leading-[1.9]">I also mapped Germany's Pflegegrad legislation to understand where decision complexity actually lives, and which parts could be simplified versus which required legal precision.</p>
+            <div class="flex flex-wrap gap-2 mt-2">
+              <span class="tag-teal">Caregiver Interviews</span>
+              <span class="tag-teal">Legislation Mapping</span>
+              <span class="tag-teal">Empathy Mapping</span>
+            </div>
+          </div>
+          <div class="border-card p-5 flex flex-col gap-3 self-start">
+            <p class="font-mono text-[10px] text-[#555] tracking-[1.5px] uppercase">Key Finding</p>
+            <p class="pull-quote text-[#f2f2f2]" style="font-size:1.1rem;">The barrier was emotional, not digital.</p>
+          </div>
+        </div>
+
+        <!-- Step 02 -->
+        <div class="reveal border-t border-[#1a1a1a] py-10 grid md:grid-cols-[1fr_2fr_1fr] gap-8 items-start">
+          <div>
+            <div class="step-ghost">02</div>
+          </div>
+          <div class="flex flex-col gap-4">
+            <h3 class="font-syne font-bold text-[16px] text-[#f2f2f2]">Guided Flow IA</h3>
+            <p class="font-mono text-[12px] text-[#888] leading-[1.9]">The information architecture was built on a single governing constraint: one decision per screen. Complex care pathway logic was handled entirely in the IA layer — users never see branching or conditional logic. They only ever see the next, most relevant question for their situation.</p>
+            <p class="font-mono text-[12px] text-[#888] leading-[1.9]">This required mapping every possible user pathway through the Pflegegrad assessment system and designing a tree structure that felt linear even when it wasn't. Each branch had to feel equally calm and equally guided.</p>
+            <div class="flex flex-wrap gap-2 mt-2">
+              <span class="tag-teal">Decision Tree Mapping</span>
+              <span class="tag-teal">Linear Flow Design</span>
+              <span class="tag-teal">Pathway Architecture</span>
+            </div>
+          </div>
+          <div class="border-card p-5 flex flex-col gap-3 self-start">
+            <p class="font-mono text-[10px] text-[#555] tracking-[1.5px] uppercase">Design Rule</p>
+            <p class="pull-quote text-[#f2f2f2]" style="font-size:1.1rem;">Complexity lives in the IA. Never on screen.</p>
+          </div>
+        </div>
+
+        <!-- Step 03 -->
+        <div class="reveal border-t border-[#1a1a1a] py-10 grid md:grid-cols-[1fr_2fr_1fr] gap-8 items-start">
+          <div>
+            <div class="step-ghost">03</div>
+          </div>
+          <div class="flex flex-col gap-4">
+            <h3 class="font-syne font-bold text-[16px] text-[#f2f2f2]">Accessibility-First Wireframes</h3>
+            <p class="font-mono text-[12px] text-[#888] leading-[1.9]">Wireframes were built with accessibility constraints active from the start — not applied retrospectively. Every interactive element was sized for WCAG 2.1 AA minimum tap targets (44×44px). Content hierarchy followed a strict single H1 per screen rule. Form elements had visible labels — no placeholder-as-label shortcuts.</p>
+            <p class="font-mono text-[12px] text-[#888] leading-[1.9]">I tested wireframes with actual elderly users early, specifically to identify where language caused hesitation — not just where buttons were hard to tap. Language revision happened at wireframe stage, not after visual design.</p>
+            <div class="flex flex-wrap gap-2 mt-2">
+              <span class="tag-teal">WCAG 2.1 AA</span>
+              <span class="tag-teal">Low-fi User Testing</span>
+              <span class="tag-teal">Language Validation</span>
+            </div>
+          </div>
+          <div class="border-card p-5 flex flex-col gap-3 self-start">
+            <p class="font-mono text-[10px] text-[#555] tracking-[1.5px] uppercase">Approach</p>
+            <p class="pull-quote text-[#f2f2f2]" style="font-size:1.1rem;">A11y from frame one. Never retrofitted.</p>
+          </div>
+        </div>
+
+        <!-- Step 04 -->
+        <div class="reveal border-t border-[#1a1a1a] py-10 grid md:grid-cols-[1fr_2fr_1fr] gap-8 items-start">
+          <div>
+            <div class="step-ghost">04</div>
+          </div>
+          <div class="flex flex-col gap-4">
+            <h3 class="font-syne font-bold text-[16px] text-[#f2f2f2]">Calm UI Design</h3>
+            <p class="font-mono text-[12px] text-[#888] leading-[1.9]">The visual design had one primary brief: do not add to the user's stress. High contrast without harshness. Generous white space that signals breathing room, not emptiness. A muted colour palette with a single calm accent. No decorative elements that compete with content. Typography sized for readability, not aesthetic minimalism.</p>
+            <p class="font-mono text-[12px] text-[#888] leading-[1.9]">Progress indicators were designed to feel encouraging rather than pressurising — showing how far the user had come, not how far they had left to go.</p>
+            <div class="flex flex-wrap gap-2 mt-2">
+              <span class="tag-teal">High Contrast UI</span>
+              <span class="tag-teal">Calm Visual Rhythm</span>
+              <span class="tag-teal">Accessible Typography</span>
+            </div>
+          </div>
+          <div class="border-card p-5 flex flex-col gap-3 self-start">
+            <p class="font-mono text-[10px] text-[#555] tracking-[1.5px] uppercase">Visual Principle</p>
+            <p class="pull-quote text-[#f2f2f2]" style="font-size:1.1rem;">The interface shouldn't add to the stress.</p>
+          </div>
+        </div>
+
+        <!-- Step 05 -->
+        <div class="reveal border-t border-[#1a1a1a] py-10 grid md:grid-cols-[1fr_2fr_1fr] gap-8 items-start">
+          <div>
+            <div class="step-ghost">05</div>
+          </div>
+          <div class="flex flex-col gap-4">
+            <h3 class="font-syne font-bold text-[16px] text-[#f2f2f2]">Prototyping & Mobile Testing</h3>
+            <p class="font-mono text-[12px] text-[#888] leading-[1.9]">Interactive Figma prototypes were built for both Pflegegradkompass and CareCademy — the two core products. Testing was conducted mobile-first, with real users on their own devices in realistic conditions. Not in a usability lab. In their kitchens.</p>
+            <p class="font-mono text-[12px] text-[#888] leading-[1.9]">Each test session focused on whether users could complete the flow without assistance. "Self-explanatory" was the success criterion — not "task completion rate with 1 hint". If a user paused to think, that was a redesign trigger.</p>
+            <div class="flex flex-wrap gap-2 mt-2">
+              <span class="tag-teal">Figma Prototypes</span>
+              <span class="tag-teal">Mobile-first Testing</span>
+              <span class="tag-teal">Unmoderated Sessions</span>
+            </div>
+          </div>
+          <div class="border-card p-5 flex flex-col gap-3 self-start">
+            <p class="font-mono text-[10px] text-[#555] tracking-[1.5px] uppercase">Success Criterion</p>
+            <p class="pull-quote text-[#f2f2f2]" style="font-size:1.1rem;">Zero assistance needed to complete the flow.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       ACCESSIBILITY DEEP-DIVE
+  ══════════════════════════════════════ -->
+  <section id="a11y" style="background:#0d0d0d;padding:6rem 0;border-bottom:1px solid #1a1a1a;overflow:hidden;position:relative;">
+
+    <div class="text-banner" aria-hidden="true"
+         style="position:absolute;top:40px;left:-10px;font-size:clamp(5rem,12vw,11rem);">
+      WCAG&nbsp;2.1&nbsp;&nbsp;WCAG&nbsp;2.1&nbsp;&nbsp;WCAG&nbsp;2.1
+    </div>
+
+    <div class="max-w-[1760px] mx-auto px-6 md:px-12" style="position:relative;z-index:1;">
+
+      <div class="flex items-center gap-4 mb-12 reveal">
+        <span class="section-label">04 — Accessibility Deep-Dive</span>
+        <div class="divider"></div>
+      </div>
+
+      <!-- Big statement -->
+      <div class="reveal mb-16">
+        <h2 class="font-playfair font-bold text-[#f2f2f2] leading-[1.05] mb-6" style="font-size:clamp(2rem,4.5vw,4rem);max-width:780px;">
+          Accessibility wasn't a checklist.<br>
+          It was the <em class="italic" style="color:#0aaba4;">brief.</em>
+        </h2>
+        <p class="font-mono text-[12px] text-[#888] leading-[1.9]" style="max-width:560px;">When your users are elderly, stressed, or digitally inexperienced — WCAG compliance is the floor, not the ceiling. Here's what that looked like in practice.</p>
+      </div>
+
+      <!-- A11y grid -->
+      <div class="grid md:grid-cols-2 gap-2 reveal">
+
+        <div class="border-card p-8 flex flex-col gap-5">
+          <div class="flex items-center justify-between">
+            <h3 class="font-syne font-bold text-[15px] text-[#f2f2f2]">Touch Target Sizing</h3>
+            <span class="wcag-badge">2.5.5 AAA</span>
+          </div>
+          <p class="font-mono text-[11px] text-[#666] leading-[1.85]">Every interactive element — buttons, links, form fields, navigation items — was built to a minimum 44×44px tap target. Tap areas were extended with invisible padding beyond visible borders, so users with tremor or reduced precision don't miss their intended target.</p>
+          <div class="border-t border-[#2e2e2e] pt-4 flex items-center gap-6 font-mono text-[10px] text-[#555]">
+            <span>Min: <span style="color:#0aaba4;">44×44px</span></span>
+            <span>Ideal: <span style="color:#0aaba4;">48×48px</span></span>
+            <span>Gap between: <span style="color:#0aaba4;">8px+</span></span>
+          </div>
+        </div>
+
+        <div class="border-card p-8 flex flex-col gap-5">
+          <div class="flex items-center justify-between">
+            <h3 class="font-syne font-bold text-[15px] text-[#f2f2f2]">Colour Contrast</h3>
+            <span class="wcag-badge">1.4.3 AA</span>
+          </div>
+          <p class="font-mono text-[11px] text-[#666] leading-[1.85]">All text/background combinations were tested against WCAG 4.5:1 minimum ratio for normal text and 3:1 for large text. No information was conveyed by colour alone — status indicators always paired colour with an icon or text label, supporting users with colour blindness.</p>
+          <div class="border-t border-[#2e2e2e] pt-4 flex items-center gap-6 font-mono text-[10px] text-[#555]">
+            <span>Body: <span style="color:#0aaba4;">7:1+</span></span>
+            <span>Interactive: <span style="color:#0aaba4;">4.5:1+</span></span>
+            <span>Focus: <span style="color:#0aaba4;">3:1+</span></span>
+          </div>
+        </div>
+
+        <div class="border-card p-8 flex flex-col gap-5">
+          <div class="flex items-center justify-between">
+            <h3 class="font-syne font-bold text-[15px] text-[#f2f2f2]">Plain Language</h3>
+            <span class="wcag-badge">3.1.5 AAA</span>
+          </div>
+          <p class="font-mono text-[11px] text-[#666] leading-[1.85]">Every piece of copy was reviewed against plain language principles. Legal Pflegegrad terminology was rewritten into everyday German without losing legal accuracy. Active voice, short sentences, concrete verbs. Instructions were validated in testing sessions — if users paused to re-read, the copy was rewritten.</p>
+          <div class="border-t border-[#2e2e2e] pt-4 font-mono text-[10px] text-[#555]">
+            <span>Reading level: <span style="color:#0aaba4;">B1 or below</span></span>
+          </div>
+        </div>
+
+        <div class="border-card p-8 flex flex-col gap-5">
+          <div class="flex items-center justify-between">
+            <h3 class="font-syne font-bold text-[15px] text-[#f2f2f2]">Error Prevention</h3>
+            <span class="wcag-badge">3.3.4 AA</span>
+          </div>
+          <p class="font-mono text-[11px] text-[#666] leading-[1.85]">For users unfamiliar with digital forms, errors feel like failure. Every form was designed to prevent errors before they happen: inline validation with clear, non-judgmental language; no irreversible actions without explicit confirmation; progress never lost on back-navigation.</p>
+          <div class="border-t border-[#2e2e2e] pt-4 font-mono text-[10px] text-[#555]">
+            <span>Back-nav: <span style="color:#0aaba4;">always preserves input</span></span>
+          </div>
+        </div>
+
+        <div class="border-card p-8 flex flex-col gap-5">
+          <div class="flex items-center justify-between">
+            <h3 class="font-syne font-bold text-[15px] text-[#f2f2f2]">Focus Management</h3>
+            <span class="wcag-badge">2.4.3 AA</span>
+          </div>
+          <p class="font-mono text-[11px] text-[#666] leading-[1.85]">On each screen transition, focus was deliberately managed to land on the primary heading or first interactive element — not left stranded on a nav item or lost off-screen. Keyboard and screen reader users received the same logical flow as pointer users.</p>
+          <div class="border-t border-[#2e2e2e] pt-4 font-mono text-[10px] text-[#555]">
+            <span>Focus order: <span style="color:#0aaba4;">top to bottom, logical</span></span>
+          </div>
+        </div>
+
+        <div class="border-card p-8 flex flex-col gap-5">
+          <div class="flex items-center justify-between">
+            <h3 class="font-syne font-bold text-[15px] text-[#f2f2f2]">Visible Progress</h3>
+            <span class="wcag-badge">UX Principle</span>
+          </div>
+          <p class="font-mono text-[11px] text-[#666] leading-[1.85]">Progress indicators were designed to reinforce confidence, not create pressure. Showing steps completed rather than steps remaining. Language: "You've answered 4 questions" not "6 questions left." Small linguistic choices that make a material difference to a user already under emotional strain.</p>
+          <div class="border-t border-[#2e2e2e] pt-4 font-mono text-[10px] text-[#555]">
+            <span>Framing: <span style="color:#0aaba4;">achievement, not distance</span></span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       IMPACT
+  ══════════════════════════════════════ -->
+  <section id="impact" style="background:#111;padding:6rem 0;border-bottom:1px solid #1a1a1a;">
+    <div class="max-w-[1760px] mx-auto px-6 md:px-12">
+
+      <div class="flex items-center gap-4 mb-12 reveal">
+        <span class="section-label">05 — Impact</span>
+        <div class="divider"></div>
+      </div>
+
+      <!-- Large typographic impact statement -->
+      <div class="reveal mb-16 border-l-2 pl-8 md:pl-12" style="border-color:#0aaba4;">
+        <p class="pull-quote" style="font-size:clamp(1.5rem,3vw,2.6rem);max-width:700px;">
+          "Self-explanatory. A user who had never used a digital care tool completed the full Pflegegradkompass flow without assistance."
+        </p>
+        <p class="font-mono text-[11px] text-[#555] mt-4 tracking-[1px] uppercase">— Testing session result, 2022</p>
+      </div>
+
+      <!-- Impact metrics — typographic layout -->
+      <div class="grid md:grid-cols-3 gap-2 reveal mb-12">
+
+        <div class="border-card p-8 flex flex-col gap-4">
+          <div class="font-playfair font-bold italic text-[#f2f2f2] leading-none" style="font-size:clamp(2.5rem,5vw,4rem);">↓ Overwhelm</div>
+          <p class="font-mono text-[11px] text-[#666] leading-[1.8]">Significant reduction in reported cognitive overload across user testing sessions. Users described the experience as "calm," "clear," and "less frightening than expected."</p>
+          <div class="font-mono text-[9px] text-[#555] tracking-[1.5px] uppercase mt-auto pt-4 border-t border-[#1e1e1e]">Measured via post-session feedback</div>
+        </div>
+
+        <div class="border-card p-8 flex flex-col gap-4">
+          <div class="font-playfair font-bold italic text-[#f2f2f2] leading-none" style="font-size:clamp(2.5rem,5vw,4rem);">Zero</div>
+          <p class="font-mono text-[11px] text-[#666] leading-[1.8]">Onboarding required. New users — including elderly first-time smartphone users — completed the full care pathway assessment without instructions, tooltips, or support documentation.</p>
+          <div class="font-mono text-[9px] text-[#555] tracking-[1.5px] uppercase mt-auto pt-4 border-t border-[#1e1e1e]">Self-explanatory by design</div>
+        </div>
+
+        <div class="border-card p-8 flex flex-col gap-4">
+          <div class="font-playfair font-bold italic text-[#f2f2f2] leading-none" style="font-size:clamp(2.5rem,5vw,4rem);">WCAG AA</div>
+          <p class="font-mono text-[11px] text-[#666] leading-[1.8]">Full WCAG 2.1 Level AA compliance across both products — Pflegegradkompass and CareCademy. Colour, contrast, touch targets, language, focus management, and error handling all audited and validated.</p>
+          <div class="font-mono text-[9px] text-[#555] tracking-[1.5px] uppercase mt-auto pt-4 border-t border-[#1e1e1e]">Across both products</div>
+        </div>
+
+      </div>
+
+      <!-- Products delivered -->
+      <div class="reveal flex flex-col gap-2">
+        <p class="font-mono text-[10px] text-[#555] tracking-[2px] uppercase mb-3">Products Delivered</p>
+        <div class="grid md:grid-cols-2 gap-2">
+          <div class="border-card p-6 flex items-start gap-5">
+            <span class="font-playfair font-bold italic text-[1.8rem] text-[#0aaba4] leading-none shrink-0">①</span>
+            <div>
+              <h4 class="font-syne font-bold text-[14px] text-[#f2f2f2] mb-2">Pflegegradkompass</h4>
+              <p class="font-mono text-[11px] text-[#666] leading-[1.7]">A guided flow tool that walks families through Germany's care grade assessment process — step by step, one decision at a time. Replaces a 47-page legal document with a calm, conversational experience.</p>
+            </div>
+          </div>
+          <div class="border-card p-6 flex items-start gap-5">
+            <span class="font-playfair font-bold italic text-[1.8rem] text-[#0aaba4] leading-none shrink-0">②</span>
+            <div>
+              <h4 class="font-syne font-bold text-[14px] text-[#f2f2f2] mb-2">CareCademy</h4>
+              <p class="font-mono text-[11px] text-[#666] leading-[1.7]">A modular learning platform for caregivers — structured into short, digestible modules that respect the time constraints and attention capacity of people managing care responsibilities.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       REFLECTION
+  ══════════════════════════════════════ -->
+  <section id="reflection" style="background:#0d0d0d;padding:6rem 0;border-bottom:1px solid #1a1a1a;">
+    <div class="max-w-[1760px] mx-auto px-6 md:px-12">
+
+      <div class="flex items-center gap-4 mb-12 reveal">
+        <span class="section-label">06 — Reflection</span>
+        <div class="divider"></div>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-12 md:gap-20 items-start">
+
+        <div class="reveal flex flex-col gap-6">
+          <h2 class="font-playfair font-bold text-[#f2f2f2] leading-[1.1]" style="font-size:clamp(1.7rem,3vw,2.6rem);">
+            What designing for<br>vulnerability taught me<br>about design <em class="italic" style="color:#0aaba4;">in general.</em>
+          </h2>
+          <div class="flex flex-col gap-4 font-mono text-[12px] text-[#888] leading-[1.9]">
+            <p>ecaria fundamentally changed how I approach every project. Designing for users at their most stressed and least digitally confident forces a level of clarity discipline that most design contexts don't demand. When something is unclear here, it doesn't cause mild frustration — it causes abandonment at a moment of genuine need.</p>
+            <p>The "one decision per screen" principle I developed for ecaria has since influenced how I approach information architecture in every context — including data-dense SaaS. The question is always the same: what is the one thing this screen needs to communicate?</p>
+            <p>And accessibility stopped being a compliance concern the moment I sat with an elderly woman who said, quietly, that she'd given up on the previous tool because she kept pressing the wrong button. That's who we design for.</p>
+          </div>
+        </div>
+
+        <div class="reveal flex flex-col gap-3">
+          <p class="font-mono text-[10px] text-[#555] tracking-[2px] uppercase mb-2">Key Takeaways</p>
+
+          <div class="border-card p-6 flex gap-4 items-start">
+            <span class="font-playfair font-bold italic text-[1.5rem] text-[#0aaba4] leading-none shrink-0">01</span>
+            <div>
+              <h4 class="font-syne font-bold text-[13px] text-[#f2f2f2] mb-2">Constraints produce clarity</h4>
+              <p class="font-mono text-[11px] text-[#666] leading-[1.7]">The tightest constraints — one decision per screen, no jargon, 44px targets — produced the clearest design. Restrictions aren't limitations; they're design direction.</p>
+            </div>
+          </div>
+
+          <div class="border-card p-6 flex gap-4 items-start">
+            <span class="font-playfair font-bold italic text-[1.5rem] text-[#0aaba4] leading-none shrink-0">02</span>
+            <div>
+              <h4 class="font-syne font-bold text-[13px] text-[#f2f2f2] mb-2">Test with the actual user</h4>
+              <p class="font-mono text-[11px] text-[#666] leading-[1.7]">No persona or proxy reveals what sitting with a real 74-year-old user reveals in five minutes. The gap between assumed and actual user behaviour closes only with direct observation.</p>
+            </div>
+          </div>
+
+          <div class="border-card p-6 flex gap-4 items-start">
+            <span class="font-playfair font-bold italic text-[1.5rem] text-[#0aaba4] leading-none shrink-0">03</span>
+            <div>
+              <h4 class="font-syne font-bold text-[13px] text-[#f2f2f2] mb-2">Accessibility is UX quality</h4>
+              <p class="font-mono text-[11px] text-[#666] leading-[1.7]">Every accessibility improvement — clearer language, larger targets, better focus management — also improved the experience for users with no accessibility needs. They're not separate concerns.</p>
+            </div>
+          </div>
+
+          <div class="border-card p-6 flex gap-4 items-start">
+            <span class="font-playfair font-bold italic text-[1.5rem] text-[#0aaba4] leading-none shrink-0">04</span>
+            <div>
+              <h4 class="font-syne font-bold text-[13px] text-[#f2f2f2] mb-2">Calm is a design decision</h4>
+              <p class="font-mono text-[11px] text-[#666] leading-[1.7]">Visual calm is achievable through intention: generous space, a single accent, muted palette, unhurried typography. You don't need colour or animation to communicate confidence — you need restraint.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       NEXT CASE / CTA
+  ══════════════════════════════════════ -->
+  <section style="background:#111;padding:6rem 0;">
+    <div class="max-w-[1760px] mx-auto px-6 md:px-12">
+      <div class="reveal flex flex-col md:flex-row items-start md:items-end justify-between gap-8 border-b border-[#1a1a1a] pb-16 mb-16">
+        <div>
+          <p class="font-mono text-[10px] text-[#555] tracking-[2px] uppercase mb-4">Previous Case Study</p>
+          <h2 class="font-playfair font-bold text-[#f2f2f2] leading-[1.05]" style="font-size:clamp(2rem,4vw,3.5rem);">
+            The Live<br>
+            <em class="italic" style="color:#0aaba4;">Budget Cockpit.</em>
+          </h2>
+          <p class="font-mono text-[12px] text-[#666] mt-4" style="max-width:400px;">Data-dense SaaS redesign, Design System architecture, and frontend implementation. consalio GmbH — 2023–2026.</p>
+        </div>
+        <a href="consalio.html" class="btn-teal shrink-0">View Case Study →</a>
+      </div>
+
+      <div class="reveal flex items-center justify-between">
+        <a href="index.html" class="font-playfair font-bold text-[22px] text-[#f2f2f2] hover:text-[#0aaba4] transition-colors">Rika.</a>
+        <a href="index.html#work" class="btn-ghost">← All Work</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       FOOTER
+  ══════════════════════════════════════ -->
+  <footer style="background:#111;border-top:1px solid #1e1e1e;height:60px;display:flex;align-items:center;padding:0 48px;">
+    <div class="w-full flex items-center justify-between">
+      <span style="font-family:'DM Mono',monospace;font-size:12px;color:#444;letter-spacing:1px;">© 2026 Rika. All rights reserved.</span>
+      <a href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;"
+         style="font-family:'DM Mono',monospace;font-size:12px;color:#444;letter-spacing:1px;text-decoration:none;text-transform:uppercase;transition:color .2s;"
+         onmouseover="this.style.color='#0aaba4'" onmouseout="this.style.color='#444'">
+        Back to top ↑
+      </a>
+    </div>
+  </footer>
+
+  <!-- ══════════════════════════════════════
+       SCRIPTS
+  ══════════════════════════════════════ -->
+  <script>
+    gsap.registerPlugin(ScrollTrigger);
+
+    // ── Scroll reveals ──
+    document.querySelectorAll('.reveal').forEach(el => {
+      gsap.fromTo(el,
+        { opacity: 0, y: 24 },
+        {
+          opacity: 1, y: 0,
+          duration: 0.75,
+          ease: 'power2.out',
+          scrollTrigger: { trigger: el, start: 'top 88%', toggleActions: 'play none none none' }
+        }
+      );
+    });
+
+    // ── Process steps stagger ──
+    document.querySelectorAll('.process-step, .border-t.py-10').forEach(el => {
+      gsap.from(el, {
+        opacity: 0, x: -16,
+        duration: 0.6, ease: 'power2.out',
+        scrollTrigger: { trigger: el, start: 'top 86%', toggleActions: 'play none none none' }
+      });
+    });
+
+    // ── Read progress ──
+    window.addEventListener('scroll', () => {
+      const doc = document.documentElement;
+      const p = doc.scrollTop / (doc.scrollHeight - doc.clientHeight);
+      document.getElementById('read-progress').style.width = (p * 100) + '%';
+    }, { passive: true });
+
+    // ── Active nav ──
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('.nav-link[href^="#"]');
+    new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id));
+        }
+      });
+    }, { rootMargin: '-40% 0px -55% 0px' }).observe
+    sections.forEach(s => {
+      new IntersectionObserver(entries => {
+        entries.forEach(e => {
+          if (e.isIntersecting) navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id));
+        });
+      }, { rootMargin: '-40% 0px -55% 0px' }).observe(s);
+    });
+
+    // ── Hamburger ──
+    const hb = document.getElementById('hamburger');
+    const mm = document.getElementById('mobile-menu');
+    if (hb && mm) {
+      hb.addEventListener('click', () => {
+        const open = mm.style.display === 'flex';
+        mm.style.display = open ? 'none' : 'flex';
+        mm.style.flexDirection = 'column';
+        hb.setAttribute('aria-expanded', !open);
+      });
+      mm.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+        mm.style.display = 'none';
+        hb.setAttribute('aria-expanded', 'false');
+      }));
+    }
+  </script>
+</body>
+</html>

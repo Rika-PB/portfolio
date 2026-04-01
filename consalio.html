@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>consalio — Case Study | Rika.</title>
+  <meta name="description" content="How I redesigned a data-dense SaaS platform for financial project control — and built a Design System that unified an entire product from tool to print.">
+  <meta name="robots" content="noindex, nofollow">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;0,900;1,400;1,700;1,900&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            playfair: ['"Playfair Display"', 'serif'],
+            mono:     ['"DM Mono"', 'monospace'],
+            syne:     ['Syne', 'sans-serif'],
+          },
+          screens: { 'xs': '480px' }
+        }
+      }
+    }
+  </script>
+  <style>
+    html { scroll-behavior: smooth; }
+
+    .nav-pill {
+      background: rgba(255,255,255,0.02);
+      backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
+      box-shadow: 0px -2px 6px 0px rgba(0,0,0,0.16), inset 0px 2px 8px 0px rgba(255,255,255,0.36);
+      border: 1px solid rgba(255,255,255,0);
+    }
+    .nav-link { font-family:'DM Mono',monospace; font-size:13px; letter-spacing:-0.03px; color:#fff; padding:8px 16px; transition:color 0.2s; white-space:nowrap; }
+    .nav-link:hover { color:#0aaba4; }
+    .tag       { font-family:'DM Mono',monospace; font-size:12px; letter-spacing:0.992px; text-transform:uppercase; border:1px solid #2e2e2e; color:#888; padding:4px 15px; height:27px; display:inline-flex; align-items:center; white-space:nowrap; }
+    .tag-teal  { font-family:'DM Mono',monospace; font-size:12px; letter-spacing:0.928px; text-transform:uppercase; border:1px solid rgba(200,191,176,0.25); color:#0aaba4; padding:3px 10px; height:22px; display:inline-flex; align-items:center; white-space:nowrap; }
+    .cs-pill   { font-family:'DM Mono',monospace; font-size:12px; letter-spacing:0.5px; text-transform:uppercase; border:1px solid #2e2e2e; color:#555; padding:4px 12px; border-radius:999px; white-space:nowrap; display:inline-flex; align-items:center; }
+    .btn-teal  { background:rgba(10,171,164,0.1); border:1px solid #0aaba4; color:#0aaba4; font-family:'DM Mono',monospace; font-size:13px; letter-spacing:1.382px; text-transform:uppercase; padding:10px 16px; display:inline-flex; align-items:center; transition:background 0.2s; }
+    .btn-teal:hover { background:rgba(10,171,164,0.2); }
+    .section-label { font-family:'DM Mono',monospace; font-size:12px; letter-spacing:2.08px; text-transform:uppercase; color:#555; }
+    .divider { width:80px; height:1px; background:#2e2e2e; display:inline-block; flex-shrink:0; }
+
+    .hero-line { font-family:'Playfair Display',serif; font-weight:800; font-size:clamp(3rem,7vw,8.5rem); line-height:0.92; letter-spacing:-2.72px; display:block; }
+
+    .process-step { position:relative; padding-left:2.5rem; }
+    .process-step::before { content:attr(data-num); position:absolute; left:0; top:2px; font-family:'DM Mono',monospace; font-size:12px; color:#0aaba4; letter-spacing:1px; }
+    .process-step:not(:last-child)::after { content:''; position:absolute; left:0.28rem; top:1.8rem; width:1px; bottom:-2rem; background:linear-gradient(to bottom,#2e2e2e,transparent); }
+
+    .mockup-ph { background:#141414; border:1px solid #2e2e2e; border-radius:12px; overflow:hidden; }
+    .mockup-ph-inner { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; aspect-ratio:16/10; background:repeating-linear-gradient(-45deg,#141414 0px,#141414 10px,#161616 10px,#161616 20px); }
+    .mockup-ph-inner span { font-family:'DM Mono',monospace; font-size:12px; color:#333; letter-spacing:1.5px; text-transform:uppercase; }
+    .browser-chrome { background:#1c1c1c; padding:10px 16px; display:flex; align-items:center; gap:6px; }
+    .browser-dot { width:10px; height:10px; border-radius:50%; background:#333; flex-shrink:0; }
+    .browser-url { flex:1; height:20px; background:#252525; border-radius:3px; margin-left:8px; display:flex; align-items:center; padding:0 10px; }
+
+    .glow-card {
+      --size:400; --spotlight-size:calc(var(--size)*1px);
+      background-image:radial-gradient(var(--spotlight-size) var(--spotlight-size) at calc(var(--x,-9999)*1px) calc(var(--y,-9999)*1px),hsl(174 75% 38%/0.08),transparent);
+      background-color:#141414; border:1px solid #2e2e2e; position:relative; overflow:hidden;
+    }
+    .glow-card::before {
+      pointer-events:none; content:""; position:absolute; inset:-1px;
+      border:1px solid transparent;
+      background-image:radial-gradient(calc(var(--spotlight-size)*0.75) calc(var(--spotlight-size)*0.75) at calc(var(--x,-9999)*1px) calc(var(--y,-9999)*1px),hsl(174 90% 55%/0.7),transparent 100%);
+      filter:brightness(1.8);
+      mask:linear-gradient(transparent,transparent),linear-gradient(white,white);
+      mask-clip:padding-box,border-box; mask-composite:intersect; -webkit-mask-composite:destination-in;
+    }
+
+    .reveal { opacity:0; transform:translateY(28px); transition:opacity .75s ease,transform .75s ease; }
+    .reveal.visible { opacity:1; transform:translateY(0); }
+
+    @keyframes fadeUp { from{opacity:0;transform:translateY(22px)} to{opacity:1;transform:translateY(0)} }
+    .fade-in { animation:fadeUp 0.7s ease forwards; opacity:0; }
+
+    #mobile-menu { display:none; }
+    #mobile-menu.open { display:flex; }
+
+    @media (max-width:768px) {
+      .hero-line { font-size:clamp(2.6rem,11vw,3.8rem) !important; letter-spacing:-1px !important; }
+      .tag,.tag-teal,.cs-pill { font-size:12px !important; height:auto !important; padding:5px 10px !important; }
+      .section-label { font-size:12px !important; }
+      section { padding-left:24px !important; padding-right:24px !important; }
+    }
+  </style>
+</head>
+<body class="bg-[#111] text-white overflow-x-hidden">
+
+  <!-- NAV -->
+  <nav id="main-nav" class="fixed top-0 left-0 right-0 z-50 bg-[rgba(17,17,17,0.92)] backdrop-blur-md border-b border-[#2e2e2e]">
+    <div class="flex items-center justify-between px-6 md:px-12 h-[70px]">
+      <a href="index.html" class="font-playfair font-bold text-[22px] text-[#f2f2f2] tracking-[0.45px] hover:text-[#0aaba4] transition-colors shrink-0">Rika.</a>
+      <div class="nav-pill rounded-[63px] hidden md:flex items-center px-1 py-1 gap-0.5">
+        <a href="index.html#about"   class="nav-link">ABOUT</a>
+        <a href="index.html#work"    class="nav-link">WORK</a>
+        <a href="index.html#lab"     class="nav-link">THE LAB</a>
+        <a href="index.html#skills"  class="nav-link">SKILLS</a>
+      </div>
+      <div class="flex items-center gap-3">
+        <a href="index.html#contact" class="hidden md:inline-flex items-center" style="border:1px solid #0aaba4;color:#0aaba4;padding:8px 20px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;background:transparent;cursor:pointer;transition:background 0.2s ease,color 0.2s ease;text-decoration:none;" onmouseover="this.style.background='#0aaba4';this.style.color='#111111'" onmouseout="this.style.background='transparent';this.style.color='#0aaba4'">CONTACT</a>
+        <button id="hamburger" class="md:hidden flex flex-col gap-[5px] p-2" aria-label="Open menu">
+          <span class="block w-6 h-px bg-[#f2f2f2]"></span>
+          <span class="block w-6 h-px bg-[#f2f2f2]"></span>
+          <span class="block w-4 h-px bg-[#f2f2f2]"></span>
+        </button>
+      </div>
+    </div>
+    <div id="mobile-menu" class="md:hidden flex-col bg-[#111] border-t border-[#2e2e2e] px-6 py-4 gap-1">
+      <a href="index.html#about"   class="nav-link block py-3 border-b border-[#1e1e1e]">ABOUT</a>
+      <a href="index.html#work"    class="nav-link block py-3 border-b border-[#1e1e1e]">WORK</a>
+      <a href="index.html#lab"     class="nav-link block py-3 border-b border-[#1e1e1e]">THE LAB</a>
+      <a href="index.html#skills"  class="nav-link block py-3 border-b border-[#1e1e1e]">SKILLS</a>
+      <a href="index.html#contact" class="nav-link block py-3">CONTACT</a>
+    </div>
+  </nav>
+
+  <!-- ══ HERO ══ -->
+  <section style="min-height:100vh;background:#000000;display:flex;flex-direction:column;justify-content:center;overflow:hidden;position:relative;padding:0;">
+    <div aria-hidden="true" style="position:absolute;top:15%;right:8%;width:700px;height:700px;border-radius:50%;background:radial-gradient(ellipse at center,rgba(10,171,164,0.055) 0%,transparent 68%);pointer-events:none;"></div>
+
+    <div style="position:relative;z-index:2;max-width:1760px;margin:0 auto;width:100%;box-sizing:border-box;" class="px-6 md:px-12 pt-[90px] pb-10 md:pt-[110px] md:pb-20">
+
+      <!-- Breadcrumb -->
+      <div class="flex items-center gap-3 mb-8 fade-in" style="animation-delay:.1s">
+        <a href="index.html#work" class="font-mono text-[11px] text-[#555] tracking-[1.5px] uppercase hover:text-[#0aaba4] transition-colors">← All Work</a>
+        <span class="text-[#2e2e2e]">/</span>
+        <span class="font-mono text-[11px] text-[#0aaba4] tracking-[1.5px] uppercase">consalio GmbH</span>
+      </div>
+
+      <!-- Two-column split -->
+      <div class="flex flex-col lg:flex-row lg:items-center gap-10 lg:gap-16">
+
+        <!-- LEFT — text -->
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-4 flex-wrap mb-6 fade-in" style="animation-delay:.2s">
+            <span class="font-mono text-[11px] text-[#555] tracking-[1.87px] uppercase">consalio GmbH</span>
+            <span class="text-[#2e2e2e]">·</span>
+            <span class="font-mono text-[11px] text-[#444]">2023 — 2026</span>
+            <span class="text-[#2e2e2e]">·</span>
+            <span class="font-mono text-[11px] text-[#444]">SaaS · Product Design · Design System · Frontend</span>
+          </div>
+
+          <div class="fade-in" style="animation-delay:.3s">
+            <span class="hero-line" style="color:#e8e8e8;">The Live</span>
+            <span class="hero-line" style="color:#0aaba4;font-style:italic;">Budget</span>
+            <span class="hero-line" style="color:#e8e8e8;">Cockpit.</span>
+          </div>
+
+          <div class="fade-in mt-8" style="animation-delay:.45s">
+            <p class="font-mono italic text-[13px] md:text-[14px] text-[#888] leading-[1.8]" style="max-width:480px;">
+              Replacing Excel chaos with real-time project intelligence — for CFOs, PMOs, and project managers.
+            </p>
+          </div>
+
+          <div class="flex gap-2 flex-wrap mt-6 fade-in" style="animation-delay:.55s">
+            <span class="cs-pill">SaaS</span><span class="cs-pill">Data Viz</span>
+            <span class="cs-pill">Design System</span><span class="cs-pill">Frontend</span>
+            <span class="cs-pill">Product Design</span>
+          </div>
+        </div>
+
+        <!-- RIGHT — hero video -->
+        <div class="flex-1 min-w-0 fade-in" style="animation-delay:.4s;">
+          <div style="position:relative;border-radius:0;overflow:hidden;padding:0;">
+            <!-- Edge-blend gradient overlay -->
+            <div aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;z-index:2;background:linear-gradient(to left,#000000 0%,transparent 15%,transparent 85%,#000000 100%),linear-gradient(to bottom,#000000 0%,transparent 20%),linear-gradient(to top,#000000 0%,transparent 20%);"></div>
+            <video
+              id="hero-video"
+              src="consalio_hero_unit_video.mp4"
+              autoplay muted playsinline preload="auto"
+              style="width:100%;height:auto;display:block;object-fit:contain;border-radius:0;border:none;outline:none;"
+            ></video>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div aria-hidden="true" style="position:absolute;bottom:0;left:0;right:0;height:160px;background:linear-gradient(to bottom,transparent 0%,#111 100%);pointer-events:none;z-index:1;"></div>
+  </section>
+
+  <!-- ══ IMPACT STATS ══ -->
+  <div style="background:#111;border-top:1px solid #1a1a1a;border-bottom:1px solid #1a1a1a;">
+    <div class="grid grid-cols-2 md:grid-cols-4 max-w-[1760px] mx-auto">
+      <div class="flex flex-col gap-2 p-8 md:p-10 border-r border-[#1a1a1a] reveal">
+        <span class="font-playfair font-bold italic text-[#f2f2f2]" style="font-size:clamp(2rem,3.5vw,3rem);line-height:1;">&lt;5</span>
+        <span class="font-mono text-[9px] text-[#555] tracking-[1.2px] uppercase leading-[1.6]">Clicks to<br>First Value</span>
+      </div>
+      <div class="flex flex-col gap-2 p-8 md:p-10 border-r border-[#1a1a1a] reveal" style="transition-delay:.07s">
+        <span class="font-playfair font-bold italic text-[#f2f2f2]" style="font-size:clamp(2rem,3.5vw,3rem);line-height:1;">↓60%</span>
+        <span class="font-mono text-[9px] text-[#555] tracking-[1.2px] uppercase leading-[1.6]">Complexity<br>Reduced</span>
+      </div>
+      <div class="flex flex-col gap-2 p-8 md:p-10 border-r border-[#1a1a1a] reveal" style="transition-delay:.14s">
+        <span class="font-playfair font-bold italic text-[#f2f2f2]" style="font-size:clamp(2rem,3.5vw,3rem);line-height:1;">1 System</span>
+        <span class="font-mono text-[9px] text-[#555] tracking-[1.2px] uppercase leading-[1.6]">All platforms<br>unified</span>
+      </div>
+      <div class="flex flex-col gap-2 p-8 md:p-10 reveal" style="transition-delay:.21s">
+        <span class="font-playfair font-bold italic text-[#f2f2f2]" style="font-size:clamp(2rem,3.5vw,3rem);line-height:1;">0 delay</span>
+        <span class="font-mono text-[9px] text-[#555] tracking-[1.2px] uppercase leading-[1.6]">Design → Code<br>no handoff</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ THE CHALLENGE ══ -->
+  <section style="background:#0d0d0d;padding:100px 48px;">
+    <div class="max-w-[1760px] mx-auto">
+      <div class="flex flex-col md:flex-row gap-16 md:gap-24 items-start">
+        <div class="md:w-[42%] flex-shrink-0 reveal">
+          <div class="flex items-center gap-4 mb-8">
+            <span class="section-label">01 — The Challenge</span>
+            <div class="divider"></div>
+          </div>
+          <h2 class="font-playfair font-bold text-[#f2f2f2] leading-[1.1] tracking-[-0.5px]" style="font-size:clamp(28px,3.5vw,52px);">
+            Operating blind<br>in a <em class="italic text-[#0aaba4]">sea of data.</em>
+          </h2>
+          <div class="mt-10 border-l-2 border-[#0aaba4] pl-6">
+            <p class="font-playfair italic text-[#888] leading-[1.6]" style="font-size:clamp(15px,1.3vw,19px);">
+              "Every financial decision was a calculated guess. The product existed — but its interface made the problem worse, not better."
+            </p>
+          </div>
+        </div>
+        <div class="flex-1 flex flex-col gap-6 reveal" style="transition-delay:.1s">
+          <p class="font-mono text-[12.5px] md:text-[13px] text-[#aaa] leading-[1.9]">
+            consalio is a cloud-based SaaS platform helping companies manage external consultants, project budgets, and vendor invoices in real time. By the time I joined, the platform had a critical UX problem: <strong class="text-[#f2f2f2] font-normal">the data was there, but none of it was legible.</strong>
+          </p>
+          <p class="font-mono text-[12.5px] md:text-[13px] text-[#aaa] leading-[1.9]">
+            CFOs and project managers were drowning in fragmented spreadsheets, chasing late invoices, and operating with zero real-time visibility into budget vs. actuals. The challenge wasn't a simple UI refresh — it was a <strong class="text-[#f2f2f2] font-normal">structural redesign problem</strong>: how to translate massive numerical datasets into interfaces that three very different user types could act on immediately.
+          </p>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
+            <div style="background:#141414;border:1px solid #2e2e2e;padding:20px;">
+              <span class="font-mono text-[10px] text-[#0aaba4] tracking-[1.2px] uppercase block mb-2">CFO / Finance</span>
+              <p class="font-mono text-[11.5px] text-[#666] leading-[1.7]">Strategic KPI overview. Budget vs. forecast at a glance. No noise.</p>
+            </div>
+            <div style="background:#141414;border:1px solid #2e2e2e;padding:20px;">
+              <span class="font-mono text-[10px] text-[#0aaba4] tracking-[1.2px] uppercase block mb-2">Project Manager</span>
+              <p class="font-mono text-[11.5px] text-[#666] leading-[1.7]">Budget deviation alerts. Vendor tracking. Operational clarity.</p>
+            </div>
+            <div style="background:#141414;border:1px solid #2e2e2e;padding:20px;">
+              <span class="font-mono text-[10px] text-[#0aaba4] tracking-[1.2px] uppercase block mb-2">Assistant</span>
+              <p class="font-mono text-[11.5px] text-[#666] leading-[1.7]">Fast action queue. Simple navigation. Zero learning curve.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ MY ROLE ══ -->
+  <section style="background:#111;padding:100px 48px;border-top:1px solid #1a1a1a;">
+    <div class="max-w-[1760px] mx-auto">
+      <div class="flex items-center gap-4 mb-14 reveal">
+        <span class="section-label">02 — My Role</span>
+        <div class="divider"></div>
+      </div>
+      <div class="flex flex-col md:flex-row gap-16 items-start">
+        <div class="md:w-[42%] flex-shrink-0 reveal">
+          <h2 class="font-playfair font-bold text-[#f2f2f2] leading-[1.1] tracking-[-0.5px] mb-6" style="font-size:clamp(26px,3vw,46px);">
+            From strategy<br>to <em class="italic text-[#0aaba4]">shipping.</em>
+          </h2>
+          <p class="font-mono text-[12.5px] text-[#888] leading-[1.9]">
+            My scope on consalio crossed from UX/UI Design into <strong class="text-[#f2f2f2] font-normal">Product Design</strong>. I drove features from idea to implementation — no handoff, no waiting.
+          </p>
+        </div>
+        <div class="flex-1 reveal" style="transition-delay:.1s">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <div class="glow-card p-7 flex flex-col gap-3">
+              <span class="font-mono text-[20px] text-[#0aaba4]">◈</span>
+              <h3 class="font-syne font-bold text-[15px] text-[#f2f2f2]">UX Strategy & Architecture</h3>
+              <p class="font-mono text-[11.5px] text-[#666] leading-[1.75]">Full IA restructure, role-based navigation logic, and user flow mapping for three distinct personas with fundamentally different needs.</p>
+            </div>
+            <div class="glow-card p-7 flex flex-col gap-3">
+              <span class="font-mono text-[20px] text-[#0aaba4]">⌗</span>
+              <h3 class="font-syne font-bold text-[15px] text-[#f2f2f2]">Design System — Built from Zero</h3>
+              <p class="font-mono text-[11.5px] text-[#666] leading-[1.75]">Complete component library, colour tokens, status logic, table patterns, and chart components. Platform-agnostic — tool, web, print, ads.</p>
+            </div>
+            <div class="glow-card p-7 flex flex-col gap-3">
+              <span class="font-mono text-[20px] text-[#0aaba4]">✦</span>
+              <h3 class="font-syne font-bold text-[15px] text-[#f2f2f2]">Figma Prototyping</h3>
+              <p class="font-mono text-[11.5px] text-[#666] leading-[1.75]">Fully interactive prototypes for every major journey — replacing static decks as the primary stakeholder communication tool.</p>
+            </div>
+            <div class="glow-card p-7 flex flex-col gap-3">
+              <span class="font-mono text-[20px] text-[#0aaba4]">⬡</span>
+              <h3 class="font-syne font-bold text-[15px] text-[#f2f2f2]">Frontend Implementation</h3>
+              <p class="font-mono text-[11.5px] text-[#666] leading-[1.75]">Component library built in Tailwind CSS and shipped directly. Zero handoff delay. Design intent = production output.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ PROCESS ══ -->
+  <section style="background:#0d0d0d;padding:100px 48px;border-top:1px solid #1a1a1a;">
+    <div class="max-w-[1760px] mx-auto">
+      <div class="flex items-center gap-4 mb-14 reveal">
+        <span class="section-label">03 — Process</span>
+        <div class="divider"></div>
+      </div>
+      <h2 class="font-playfair font-bold text-[#f2f2f2] leading-[1.1] tracking-[-0.5px] mb-16 reveal" style="font-size:clamp(26px,3vw,46px);">
+        Five phases.<br>One <em class="italic text-[#0aaba4]">consistent system.</em>
+      </h2>
+      <div class="flex flex-col md:flex-row gap-16 md:gap-24">
+        <div class="md:w-[48%] flex flex-col gap-12 reveal" style="transition-delay:.06s">
+          <div class="process-step" data-num="01">
+            <h3 class="font-syne font-bold text-[15px] text-[#f2f2f2] mb-2">Research & Audit</h3>
+            <p class="font-mono text-[12px] text-[#666] leading-[1.85]">Deep analysis of the existing product: drop-off points, friction screens, and how each persona experienced the tool differently. Core finding: raw tables with no visual hierarchy forced users to mentally translate data before they could act on it.</p>
+          </div>
+          <div class="process-step" data-num="02">
+            <h3 class="font-syne font-bold text-[15px] text-[#f2f2f2] mb-2">Information Architecture & User Flows</h3>
+            <p class="font-mono text-[12px] text-[#666] leading-[1.85]">Restructured the entire navigation logic around one insight: each role needed a fundamentally different entry point. A CFO lands on KPI summary. A PM lands on deviation alerts. An Assistant on the action queue. Same data — three lenses.</p>
+          </div>
+          <div class="process-step" data-num="03">
+            <h3 class="font-syne font-bold text-[15px] text-[#f2f2f2] mb-2">Design System</h3>
+            <p class="font-mono text-[12px] text-[#666] leading-[1.85]">Before a single screen, I built the system. Typography scale, spacing tokens, a semantic three-state status system (on-budget / at-risk / over-budget), table components, KPI cards, and chart patterns. Built platform-agnostic from day one.</p>
+          </div>
+          <div class="process-step" data-num="04">
+            <h3 class="font-syne font-bold text-[15px] text-[#f2f2f2] mb-2">UI Design & Figma Prototyping</h3>
+            <p class="font-mono text-[12px] text-[#666] leading-[1.85]">With the system in place, screen design moved fast. Centrepiece: the Live Project Cockpit — replacing table-heavy interfaces with visual KPI layers, budget curves, spend-vs-forecast charts, and traffic-light status indicators.</p>
+          </div>
+          <div class="process-step" data-num="05">
+            <h3 class="font-syne font-bold text-[15px] text-[#f2f2f2] mb-2">Frontend Implementation</h3>
+            <p class="font-mono text-[12px] text-[#666] leading-[1.85]">I implemented UI components directly in Tailwind CSS. Later in the Charon phase, I vibe-coded the sticky note feature end-to-end — sketch → code → live product, independently. No interpretation gap, no delay.</p>
+          </div>
+        </div>
+        <div class="flex-1 flex flex-col gap-4 reveal" style="transition-delay:.16s">
+          <div class="mockup-ph">
+            <div class="browser-chrome">
+              <div class="browser-dot"></div><div class="browser-dot"></div><div class="browser-dot"></div>
+              <div class="browser-url"><span class="font-mono text-[9px] text-[#333] tracking-[0.5px]">app.consalio.com/dashboard</span></div>
+            </div>
+            <img src="assets/dashboard.png" loading="lazy" width="100%" style="border-radius:4px;" alt="Charon dashboard screenshot">
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="mockup-ph">
+              <img src="assets/Budget overview.png" loading="lazy" width="100%" style="border-radius:4px;" alt="Budget overview">
+            </div>
+            <div class="mockup-ph">
+              <img src="assets/invoice.png" loading="lazy" width="100%" style="border-radius:4px;" alt="Invoice view">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ DESIGN SYSTEM ══ -->
+  <section style="background:#111;padding:100px 48px;border-top:1px solid #1a1a1a;">
+    <div class="max-w-[1760px] mx-auto">
+      <div class="flex items-center gap-4 mb-14 reveal">
+        <span class="section-label">04 — Design System</span>
+        <div class="divider"></div>
+      </div>
+      <div class="flex flex-col md:flex-row gap-16 md:gap-24 items-start">
+        <div class="md:w-[38%] flex-shrink-0 reveal">
+          <h2 class="font-playfair font-bold text-[#f2f2f2] leading-[1.1] tracking-[-0.5px] mb-6" style="font-size:clamp(26px,3vw,46px);">
+            One system.<br><em class="italic text-[#0aaba4]">Total consistency.</em>
+          </h2>
+          <p class="font-mono text-[12.5px] text-[#888] leading-[1.9] mb-8">Before designing a single screen, I built the system. The consalio Design System was built <strong class="text-[#f2f2f2] font-normal">platform-agnostic from day one</strong> — the same visual language applied to the SaaS tool, website, print materials, and advertising assets.</p>
+          <div class="flex flex-col gap-3">
+            <div class="flex items-center gap-3 font-mono text-[11.5px] text-[#666]"><span class="w-1.5 h-1.5 rounded-full bg-[#0aaba4] flex-shrink-0"></span>Typography scale & spacing tokens</div>
+            <div class="flex items-center gap-3 font-mono text-[11.5px] text-[#666]"><span class="w-1.5 h-1.5 rounded-full bg-[#0aaba4] flex-shrink-0"></span>Semantic 3-state budget status system</div>
+            <div class="flex items-center gap-3 font-mono text-[11.5px] text-[#666]"><span class="w-1.5 h-1.5 rounded-full bg-[#0aaba4] flex-shrink-0"></span>Table components — backbone of financial UX</div>
+            <div class="flex items-center gap-3 font-mono text-[11.5px] text-[#666]"><span class="w-1.5 h-1.5 rounded-full bg-[#0aaba4] flex-shrink-0"></span>KPI cards, charts, data visualisation</div>
+            <div class="flex items-center gap-3 font-mono text-[11.5px] text-[#666]"><span class="w-1.5 h-1.5 rounded-full bg-[#0aaba4] flex-shrink-0"></span>Form patterns, inputs, alert logic</div>
+            <div class="flex items-center gap-3 font-mono text-[11.5px] text-[#666]"><span class="w-1.5 h-1.5 rounded-full bg-[#0aaba4] flex-shrink-0"></span>Component library — Tailwind CSS</div>
+          </div>
+        </div>
+        <div class="flex-1 flex flex-col gap-4 reveal" style="transition-delay:.1s">
+          <div style="background:#141414;border:1px solid #2e2e2e;padding:28px;">
+            <span class="font-mono text-[10px] text-[#555] tracking-[1.5px] uppercase block mb-5">Status System — Budget Health Logic</span>
+            <div class="flex flex-wrap gap-3">
+              <div class="flex items-center gap-3 px-4 py-2.5" style="background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.2)">
+                <span style="width:8px;height:8px;border-radius:50%;background:#22c55e;flex-shrink:0"></span>
+                <span class="font-mono text-[11px] text-[#22c55e] tracking-[0.8px] uppercase">On Budget</span>
+              </div>
+              <div class="flex items-center gap-3 px-4 py-2.5" style="background:rgba(234,179,8,0.06);border:1px solid rgba(234,179,8,0.2)">
+                <span style="width:8px;height:8px;border-radius:50%;background:#eab308;flex-shrink:0"></span>
+                <span class="font-mono text-[11px] text-[#eab308] tracking-[0.8px] uppercase">At Risk</span>
+              </div>
+              <div class="flex items-center gap-3 px-4 py-2.5" style="background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.2)">
+                <span style="width:8px;height:8px;border-radius:50%;background:#ef4444;flex-shrink:0"></span>
+                <span class="font-mono text-[11px] text-[#ef4444] tracking-[0.8px] uppercase">Over Budget</span>
+              </div>
+            </div>
+            <p class="font-mono text-[10.5px] text-[#444] leading-[1.7] mt-4">Consistent across every component — cards, tables, charts, notifications. One glance = full project health.</p>
+          </div>
+          <div class="mockup-ph">
+            <img src="component_sheet.png" loading="lazy" width="100%" style="border-radius:4px;" alt="Charon component library sheet">
+          </div>
+          <div style="background:#141414;border:1px solid #2e2e2e;padding:24px;" class="flex items-start gap-4">
+            <span class="font-mono text-[18px] text-[#0aaba4] flex-shrink-0 mt-0.5">↗</span>
+            <div>
+              <span class="font-mono text-[10px] text-[#0aaba4] tracking-[1.2px] uppercase block mb-2">Platform Coverage</span>
+              <p class="font-mono text-[11.5px] text-[#666] leading-[1.75]">The same system governed the SaaS tool, marketing website, print sales materials, newspaper articles, merchandise, and advertising. Every touchpoint — one visual language.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ PROTOTYPE EMBED ══ -->
+  <section style="background:#0d0d0d;padding:100px 48px;border-top:1px solid #1a1a1a;">
+    <div class="max-w-[1760px] mx-auto">
+      <div class="flex items-center gap-4 mb-8 reveal">
+        <span class="section-label">05 — Prototype</span>
+        <div class="divider"></div>
+      </div>
+      <div class="flex flex-col md:flex-row md:items-end gap-6 mb-12 reveal" style="transition-delay:.06s">
+        <h2 class="font-playfair font-bold text-[#f2f2f2] leading-[1.1] tracking-[-0.5px]" style="font-size:clamp(26px,3vw,46px);">
+          See it in <em class="italic text-[#0aaba4]">action.</em>
+        </h2>
+        <p class="font-mono text-[12.5px] text-[#888] leading-[1.8] max-w-md md:ml-16 md:pb-1">
+          The interactive Figma prototype walked stakeholders and developers through every user journey — from portfolio overview to invoice upload to one-click report export.
+        </p>
+      </div>
+      <div class="reveal" style="transition-delay:.12s">
+        <div style="background:#141414;border:1px solid #2e2e2e;border-radius:12px;overflow:hidden;">
+          <div class="browser-chrome">
+            <div class="browser-dot"></div><div class="browser-dot"></div><div class="browser-dot"></div>
+            <div class="browser-url"><span class="font-mono text-[9px] text-[#333] tracking-[0.5px]">figma.com/proto/consalio-budget-cockpit</span></div>
+            <span class="font-mono text-[9px] text-[#555] tracking-[0.8px] uppercase ml-4">Interactive Prototype</span>
+          </div>
+          <iframe
+            src="https://www.figma.com/embed?embed_host=share&url=https%3A%2F%2Fwww.figma.com%2Fproto%2Fcv8un1ZYM8e7cuLJev4wa6%2Fconsalio%3Fnode-id%3D1-90094%26scaling%3Dmin-zoom%26content-scaling%3Dfixed%26starting-point-node-id%3D1-90094%26page-id%3D0%3A1"
+            style="width:100%;aspect-ratio:16/9;border:none;border-radius:4px;display:block;"
+            allowfullscreen
+          ></iframe>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ KEY DECISIONS ══ -->
+  <section style="background:#111;padding:100px 48px;border-top:1px solid #1a1a1a;">
+    <div class="max-w-[1760px] mx-auto">
+      <div class="flex items-center gap-4 mb-14 reveal">
+        <span class="section-label">06 — Key Decisions</span>
+        <div class="divider"></div>
+      </div>
+      <h2 class="font-playfair font-bold text-[#f2f2f2] leading-[1.1] tracking-[-0.5px] mb-14 reveal" style="font-size:clamp(26px,3vw,46px);">
+        Where senior thinking <em class="italic text-[#0aaba4]">actually happens.</em>
+      </h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-2 reveal" style="transition-delay:.08s">
+        <div style="background:#141414;border:1px solid #2e2e2e;padding:36px;border-top:2px solid #0aaba4">
+          <span class="font-mono text-[10px] text-[#0aaba4] tracking-[1.5px] uppercase block mb-4">Principle 01</span>
+          <h3 class="font-syne font-bold text-[16px] text-[#f2f2f2] mb-4 leading-[1.3]">"First-Click Value" — 5 clicks to understanding</h3>
+          <p class="font-mono text-[12px] text-[#666] leading-[1.85]">Every screen governed by one rule: the user must understand their financial position within 5 clicks of logging in. This drove radical decisions about what to surface — and what to hide. Complexity belongs in drill-downs. The surface stays clean.</p>
+        </div>
+        <div style="background:#141414;border:1px solid #2e2e2e;padding:36px;border-top:2px solid #2e2e2e">
+          <span class="font-mono text-[10px] text-[#555] tracking-[1.5px] uppercase block mb-4">Principle 02</span>
+          <h3 class="font-syne font-bold text-[16px] text-[#f2f2f2] mb-4 leading-[1.3]">Visual-first, tables second</h3>
+          <p class="font-mono text-[12px] text-[#666] leading-[1.85]">The previous interface was table-first. The redesign inverted this: charts and KPI cards on the surface, tables as the detail layer underneath. The data didn't change — its hierarchy did. Users reported faster orientation and fewer translation errors.</p>
+        </div>
+        <div style="background:#141414;border:1px solid #2e2e2e;padding:36px;border-top:2px solid #2e2e2e">
+          <span class="font-mono text-[10px] text-[#555] tracking-[1.5px] uppercase block mb-4">Principle 03</span>
+          <h3 class="font-syne font-bold text-[16px] text-[#f2f2f2] mb-4 leading-[1.3]">Role-based entry points</h3>
+          <p class="font-mono text-[12px] text-[#666] leading-[1.85]">Rather than one universal dashboard, I designed layered views — same underlying data, three different lenses. A CFO's first screen is not a PM's first screen. This single architectural decision reduced onboarding friction across all user types simultaneously.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ IMPACT ══ -->
+  <section style="background:#0d0d0d;padding:100px 48px;border-top:1px solid #1a1a1a;">
+    <div class="max-w-[1760px] mx-auto">
+      <div class="flex items-center gap-4 mb-14 reveal">
+        <span class="section-label">07 — Impact</span>
+        <div class="divider"></div>
+      </div>
+      <div class="flex flex-col md:flex-row gap-16 items-start">
+        <div class="md:w-[40%] flex-shrink-0 reveal">
+          <h2 class="font-playfair font-bold text-[#f2f2f2] leading-[1.1] tracking-[-0.5px] mb-8" style="font-size:clamp(26px,3vw,46px);">
+            Results that<br><em class="italic text-[#0aaba4]">speak for themselves.</em>
+          </h2>
+          <p class="font-mono text-[12.5px] text-[#888] leading-[1.9]">The redesign fundamentally changed how consalio users relate to their financial data. The product went from spreadsheet-replacement to genuine decision-intelligence tool.</p>
+        </div>
+        <div class="flex-1 reveal" style="transition-delay:.1s">
+          <div class="flex flex-col gap-0">
+            <div class="flex items-start gap-8 py-7 border-b border-[#1e1e1e]">
+              <span class="font-playfair font-bold italic text-[#0aaba4] flex-shrink-0" style="font-size:clamp(1.8rem,2.5vw,2.5rem);line-height:1;min-width:80px;">&lt;5</span>
+              <div><span class="font-syne font-bold text-[14px] text-[#f2f2f2] block mb-1">Clicks to First Value</span><p class="font-mono text-[11.5px] text-[#555] leading-[1.7]">Users understand their complete financial position within 5 clicks of logging in — down from a multi-minute manual process of piecing together spreadsheet data.</p></div>
+            </div>
+            <div class="flex items-start gap-8 py-7 border-b border-[#1e1e1e]">
+              <span class="font-playfair font-bold italic text-[#0aaba4] flex-shrink-0" style="font-size:clamp(1.8rem,2.5vw,2.5rem);line-height:1;min-width:80px;">↓60%</span>
+              <div><span class="font-syne font-bold text-[14px] text-[#f2f2f2] block mb-1">Complexity Reduction</span><p class="font-mono text-[11.5px] text-[#555] leading-[1.7]">Significant reduction in orientation time for CFOs and Project Managers. Visual hierarchy replaced manual data translation — the cognitive load dropped measurably.</p></div>
+            </div>
+            <div class="flex items-start gap-8 py-7 border-b border-[#1e1e1e]">
+              <span class="font-playfair font-bold italic text-[#0aaba4] flex-shrink-0" style="font-size:clamp(1.8rem,2.5vw,2.5rem);line-height:1;min-width:80px;">1</span>
+              <div><span class="font-syne font-bold text-[14px] text-[#f2f2f2] block mb-1">Unified Design System</span><p class="font-mono text-[11.5px] text-[#555] leading-[1.7]">One system governing the SaaS tool, website, print, and advertising. Eliminated visual inconsistencies and accelerated future feature development across all touchpoints.</p></div>
+            </div>
+            <div class="flex items-start gap-8 py-7">
+              <span class="font-playfair font-bold italic text-[#0aaba4] flex-shrink-0" style="font-size:clamp(1.8rem,2.5vw,2.5rem);line-height:1;min-width:80px;">0</span>
+              <div><span class="font-syne font-bold text-[14px] text-[#f2f2f2] block mb-1">Handoff Delay</span><p class="font-mono text-[11.5px] text-[#555] leading-[1.7]">By implementing components directly in Tailwind CSS, I eliminated the traditional design-to-development interpretation gap entirely. Design intent shipped as-designed, every time.</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ REFLECTION ══ -->
+  <section style="background:#111;padding:100px 48px;border-top:1px solid #1a1a1a;">
+    <div class="max-w-[1760px] mx-auto">
+      <div class="flex items-center gap-4 mb-14 reveal">
+        <span class="section-label">08 — Reflection</span>
+        <div class="divider"></div>
+      </div>
+      <div class="flex flex-col md:flex-row gap-16 md:gap-24">
+        <div class="md:w-[45%] flex-shrink-0 reveal">
+          <h2 class="font-playfair font-bold text-[#f2f2f2] leading-[1.1] tracking-[-0.5px] mb-8" style="font-size:clamp(26px,3vw,46px);">
+            What I learned<br>building for <em class="italic text-[#0aaba4]">data.</em>
+          </h2>
+          <div class="border-l-2 border-[#0aaba4] pl-6">
+            <p class="font-playfair italic text-[#888] leading-[1.65]" style="font-size:clamp(15px,1.3vw,19px);">
+              "The hardest part of data-dense design is not the visual design — it's the information architecture. The hierarchy decision is the design decision."
+            </p>
+          </div>
+        </div>
+        <div class="flex-1 flex flex-col gap-6 reveal" style="transition-delay:.1s">
+          <p class="font-mono text-[12.5px] text-[#aaa] leading-[1.9]">Building a design system for a financial SaaS tool taught me that <strong class="text-[#f2f2f2] font-normal">getting the hierarchy right is where senior-level thinking actually happens.</strong> Deciding what belongs on the surface and what belongs in a drill-down — designing status logic that works coherently across dozens of components — that's the craft that's invisible to users but defines whether a product works.</p>
+          <p class="font-mono text-[12.5px] text-[#aaa] leading-[1.9]">It also reinforced my conviction that <strong class="text-[#f2f2f2] font-normal">the designer-developer divide is itself a design problem.</strong> By closing that gap — implementing components myself — I eliminated an entire category of misinterpretation and shipping delay. The result wasn't just a better product. It was a better process.</p>
+          <p class="font-mono text-[12.5px] text-[#aaa] leading-[1.9]">The consalio project is where I stopped thinking of myself as a UX/UI Designer who also knows some code — and started thinking of myself as a <strong class="text-[#f2f2f2] font-normal">Product Designer who owns the entire journey from first sketch to shipped feature.</strong></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ NEXT CASE STUDY ══ -->
+  <section style="background:#0d0d0d;padding:80px 48px 0;border-top:1px solid #1a1a1a;overflow:hidden;">
+    <div class="max-w-[1760px] mx-auto">
+      <span class="font-mono text-[11px] text-[#555] tracking-[2px] uppercase block mb-8 reveal">Next Case Study</span>
+      <a href="ecaria.html" class="group block reveal" style="transition-delay:.06s">
+        <div style="border-top:1px solid #2e2e2e;padding:40px 0 60px;position:relative;">
+          <span aria-hidden="true" style="position:absolute;right:-1rem;top:50%;transform:translateY(-55%);font-family:'Playfair Display',serif;font-weight:800;font-size:clamp(6rem,15vw,14rem);color:rgba(255,255,255,0.025);line-height:1;pointer-events:none;user-select:none;letter-spacing:-0.05em;">02</span>
+          <div class="flex flex-col md:flex-row md:items-center gap-6">
+            <div class="flex-1">
+              <div class="flex items-center gap-4 mb-4">
+                <span class="font-mono text-[11px] text-[#555] tracking-[1.5px] uppercase">ecaria GmbH</span>
+                <span class="text-[#2e2e2e]">·</span>
+                <span class="font-mono text-[11px] text-[#444]">2021 — 2022</span>
+              </div>
+              <h3 class="font-playfair font-bold text-[#e8e8e8] leading-[1.1] tracking-[-0.4px] group-hover:text-[#0aaba4] transition-colors" style="font-size:clamp(2rem,4vw,3.5rem);">The Care Compass</h3>
+              <p class="font-mono italic text-[12px] text-[#0aaba4] mt-3 tracking-[0.5px]">Designing calm into crisis — accessibility-first healthcare UX</p>
+            </div>
+            <span class="btn-teal group-hover:bg-[rgba(10,171,164,0.2)] shrink-0">View Case Study →</span>
+          </div>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <!-- ══ FOOTER ══ -->
+  <footer class="bg-[#111] border-t border-[#2e2e2e] h-[70px] flex items-center justify-between px-6 md:px-12">
+    <span class="font-mono text-[9px] md:text-[10px] text-[#555] tracking-[0.99px]">© 2026 Rika. All rights reserved.</span>
+    <a href="#" class="font-mono text-[9px] md:text-[10px] text-[#555] tracking-[1.19px] uppercase hover:text-[#0aaba4] transition-colors">Back to top ↑</a>
+  </footer>
+
+  <script>
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Scroll reveal
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach((e, i) => {
+        if (e.isIntersecting) setTimeout(() => e.target.classList.add('visible'), i * 55);
+      });
+    }, { threshold: 0.05, rootMargin: '0px 0px -40px 0px' });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    // Mobile nav
+    const hamburger = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobile-menu');
+    if (hamburger) {
+      hamburger.addEventListener('click', () => mobileMenu.classList.toggle('open'));
+      mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => mobileMenu.classList.remove('open')));
+    }
+
+    // Hero video — play once then pause
+    const heroVideo = document.getElementById('hero-video');
+    if (heroVideo) {
+      heroVideo.addEventListener('ended', () => heroVideo.pause());
+    }
+
+    // Glow cards
+    document.querySelectorAll('.glow-card').forEach(card => {
+      card.addEventListener('mousemove', e => {
+        const r = card.getBoundingClientRect();
+        card.style.setProperty('--x', (e.clientX - r.left).toFixed(1));
+        card.style.setProperty('--y', (e.clientY - r.top).toFixed(1));
+      });
+      card.addEventListener('mouseleave', () => {
+        card.style.setProperty('--x', '-9999');
+        card.style.setProperty('--y', '-9999');
+      });
+    });
+  </script>
+</body>
+</html>

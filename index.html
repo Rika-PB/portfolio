@@ -1,0 +1,1853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rika. — UX/UI Designer &amp; Frontend Developer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;0,900;1,400;1,700;1,900&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Syne:wght@400;600;700;800&family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            playfair: ['"Playfair Display"', 'serif'],
+            mono:     ['"DM Mono"', 'monospace'],
+            syne:     ['Syne', 'sans-serif'],
+          },
+          screens: {
+            'xs': '480px',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    html { scroll-behavior: smooth; }
+
+    /* ── Marquee ── */
+    @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+    .marquee-track { animation: marquee 30s linear infinite; }
+    .marquee-wrapper:hover .marquee-track { animation-play-state: paused; }
+
+    /* ── Hero line (shared by both phases) ── */
+    .hero-line {
+      font-family: 'Playfair Display', serif;
+      font-weight: 800;
+      font-size: clamp(3rem, 7vw, 8.5rem);
+      line-height: 0.92;
+      letter-spacing: -2.72px;
+      display: block;
+      white-space: nowrap;      /* keep each phrase on one line */
+      will-change: transform, opacity;
+    }
+    /* Line 3 ghost gradient */
+    .hero-line-ghost {
+      background: linear-gradient(to bottom, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ── Hero heading gradient (legacy — kept for other uses) ── */
+    .hero-heading-block {
+      background: linear-gradient(to bottom, #ffffff 0%, #afafb0 62.981%, rgba(70,70,71,0) 93.75%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      display: block;
+    }
+    .hero-heading-block .hero-teal {
+      -webkit-text-fill-color: #0aaba4;
+      color: #0aaba4;
+    }
+
+    /* ── Nav pill glassmorphism ── */
+    .nav-pill {
+      background: rgba(255,255,255,0.02);
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
+      box-shadow: 0px -2px 6px 0px rgba(0,0,0,0.16), inset 0px 2px 8px 0px rgba(255,255,255,0.36);
+      border: 1px solid rgba(255,255,255,0);
+    }
+
+    /* ── Nav links ── */
+    .nav-link {
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      letter-spacing: -0.03px;
+      color: #fff;
+      padding: 8px 16px;
+      transition: color 0.2s;
+      white-space: nowrap;
+    }
+    .nav-link:hover { color: #0aaba4; }
+    .nav-link.active { color: #0aaba4; }
+
+    /* ── Glass card ── */
+    .glass-card {
+      background: rgba(255,255,255,0.02);
+      box-shadow: 0px -2px 6px 0px rgba(0,0,0,0.16), inset 0px 2px 8px 0px rgba(255,255,255,0.36);
+    }
+
+    /* ── Lab border cards ── */
+    .border-card {
+      background: linear-gradient(133.392deg, rgba(232,224,208,0.008) 67.308%, rgba(232,224,208,0) 100%);
+      border: 1px solid #2e2e2e;
+    }
+
+    /* ── Tags ── */
+    .tag       { font-family:'DM Mono',monospace; font-size:12px; letter-spacing:0.992px; text-transform:uppercase; border:1px solid #2e2e2e; color:#888; padding:4px 15px; height:27px; display:inline-flex; align-items:center; white-space:nowrap; }
+    .tag-white { font-family:'DM Mono',monospace; font-size:12px; letter-spacing:0.928px; text-transform:uppercase; border:1px solid white; color:#555558; padding:3px 10px; height:22px; display:inline-flex; align-items:center; white-space:nowrap; }
+    .tag-ghost { font-family:'DM Mono',monospace; font-size:12px; letter-spacing:0.928px; text-transform:uppercase; border:1px solid #fffefe; color:#fffefe; padding:3px 10px; height:22px; display:inline-flex; align-items:center; white-space:nowrap; }
+    .tag-teal  { font-family:'DM Mono',monospace; font-size:12px; letter-spacing:0.928px; text-transform:uppercase; border:1px solid rgba(200,191,176,0.25); color:#0aaba4; padding:3px 10px; height:22px; display:inline-flex; align-items:center; white-space:nowrap; }
+
+    /* ── CTA button ── */
+    .btn-teal { background:rgba(10,171,164,0.1); border:1px solid #0aaba4; color:#0aaba4; font-family:'DM Mono',monospace; font-size:13px; letter-spacing:1.382px; text-transform:uppercase; padding:10px 16px; display:inline-flex; align-items:center; transition:background 0.2s; }
+    .btn-teal:hover { background:rgba(10,171,164,0.2); }
+
+    /* ── Section label + divider ── */
+    .section-label { font-family:'DM Mono',monospace; font-size:12px; letter-spacing:2.08px; text-transform:uppercase; color:#555; }
+    .divider { width:80px; height:1px; background:#2e2e2e; display:inline-block; flex-shrink:0; }
+
+    /* ── Contact rows ── */
+    .contact-row { border-top:1px solid #2e2e2e; transition:border-color 0.2s; }
+    .contact-row:hover { border-color:#0aaba4; }
+    .contact-row .val { transition:color 0.2s; }
+    .contact-row:hover .val { color:#0aaba4; }
+
+    /* ── Mobile nav drawer ── */
+    #mobile-menu { display:none; }
+    #mobile-menu.open { display:flex; }
+
+    /* ── Spotlight / Glow Cards (skills section) ── */
+    /* --x / --y are set per-card relative to its own top-left corner */
+    .skill-card[data-glow] {
+      --size: 320;
+      --spotlight-size: calc(var(--size) * 1px);
+      background-image: radial-gradient(
+        var(--spotlight-size) var(--spotlight-size) at
+        calc(var(--x, -9999) * 1px) calc(var(--y, -9999) * 1px),
+        hsl(174 75% 38% / 0.10), transparent
+      );
+      background-color: #141414;
+      border: 1px solid #2a2a2a;
+      position: relative;
+      overflow: visible !important;
+    }
+    .skill-card[data-glow]::before,
+    .skill-card[data-glow]::after {
+      pointer-events: none;
+      content: "";
+      position: absolute;
+      inset: -1px;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      background-repeat: no-repeat;
+      background-size: 100% 100%;
+      mask: linear-gradient(transparent, transparent), linear-gradient(white, white);
+      mask-clip: padding-box, border-box;
+      mask-composite: intersect;
+      -webkit-mask-composite: destination-in;
+    }
+    /* Teal border spotlight */
+    .skill-card[data-glow]::before {
+      background-image: radial-gradient(
+        calc(var(--spotlight-size) * 0.7) calc(var(--spotlight-size) * 0.7) at
+        calc(var(--x, -9999) * 1px) calc(var(--y, -9999) * 1px),
+        hsl(174 90% 55% / 0.9), transparent 100%
+      );
+      filter: brightness(1.6);
+    }
+    /* White hot-spot */
+    .skill-card[data-glow]::after {
+      background-image: radial-gradient(
+        calc(var(--spotlight-size) * 0.4) calc(var(--spotlight-size) * 0.4) at
+        calc(var(--x, -9999) * 1px) calc(var(--y, -9999) * 1px),
+        hsl(0 0% 100% / 0.10), transparent 100%
+      );
+    }
+    .skill-card[data-glow] .glow-inner {
+      position: absolute;
+      inset: 0;
+      border-radius: 4px;
+      pointer-events: none;
+      background: none;
+    }
+
+    /* ── Sticky Note Demo ── */
+    #sticky-demo { font-family: 'Lexend', sans-serif; }
+    #sticky-demo .dragging,
+    #sticky-demo .dragging * { user-select: none !important; }
+    #sticky-demo .note-editor ul  { list-style: disc;    padding-left: 1.25rem; }
+    #sticky-demo .note-editor ol  { list-style: decimal; padding-left: 1.25rem; }
+    #sticky-demo .note-editor li  { margin: 0.125rem 0; }
+    #sticky-demo .note-title[data-empty]::before {
+      content: attr(aria-placeholder);
+      color: #bbf7d0;
+      pointer-events: none;
+    }
+    #sticky-demo .note-editor[data-empty]::before {
+      content: attr(data-placeholder);
+      color: #6b7280;
+      pointer-events: none;
+    }
+    #sticky-demo .sn-color-popover {
+      position: absolute;
+      z-index: 9999;
+      background: #fff;
+      border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06);
+      border-radius: 10px;
+      padding: 8px;
+      width: 220px;
+    }
+    #sticky-demo .sn-color-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 8px;
+    }
+    #sticky-demo .sn-color-swatch {
+      width: 24px; height: 24px;
+      border-radius: 9999px;
+      border: 2px solid #fff;
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.07);
+      cursor: pointer;
+    }
+    #sticky-demo .sn-color-arrow {
+      position: absolute;
+      width: 10px; height: 10px;
+      transform: rotate(45deg);
+      background: #fff;
+      border-left: 1px solid rgba(0,0,0,0.08);
+      border-top:  1px solid rgba(0,0,0,0.08);
+    }
+
+    /* ── Case Studies ── */
+    .cs-section.gsap-pin-spacer-invert,
+    .gsap-pin-spacer > .cs-section[style*="position: fixed"],
+    .cs-section[style*="position: fixed"] {
+      z-index: 10 !important;
+    }
+
+    .cs-pill {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      border: 1px solid #2e2e2e;
+      color: #555;
+      padding: 4px 12px;
+      border-radius: 999px;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+    }
+    .cs-pills-m { display: none; }
+    .cs-browser-chrome {
+      background: #1c1c1c;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .cs-browser-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: #333;
+      flex-shrink: 0;
+    }
+    .cs-browser-url {
+      flex: 1;
+      height: 20px;
+      background: #252525;
+      border-radius: 3px;
+      margin-left: 8px;
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+    }
+    /* ── Lab top-card spotlight (GlowCard translation) ── */
+    .lab-glow-card {
+      --size: 400;
+      --spotlight-size: calc(var(--size) * 1px);
+      background-image: radial-gradient(
+        var(--spotlight-size) var(--spotlight-size) at
+        calc(var(--x, -9999) * 1px) calc(var(--y, -9999) * 1px),
+        hsl(174 75% 38% / 0.10), transparent
+      );
+      background-color: #141414;
+      border: 1px solid #2e2e2e;
+      position: relative;
+      overflow: visible !important;
+    }
+    .lab-glow-card::before,
+    .lab-glow-card::after {
+      pointer-events: none;
+      content: "";
+      position: absolute;
+      inset: -1px;
+      border: 1px solid transparent;
+      border-radius: inherit;
+      background-repeat: no-repeat;
+      background-size: 100% 100%;
+      mask: linear-gradient(transparent, transparent), linear-gradient(white, white);
+      mask-clip: padding-box, border-box;
+      mask-composite: intersect;
+      -webkit-mask-composite: destination-in;
+    }
+    /* Teal border spotlight */
+    .lab-glow-card::before {
+      background-image: radial-gradient(
+        calc(var(--spotlight-size) * 0.75) calc(var(--spotlight-size) * 0.75) at
+        calc(var(--x, -9999) * 1px) calc(var(--y, -9999) * 1px),
+        hsl(174 90% 55% / 0.9), transparent 100%
+      );
+      filter: brightness(2);
+    }
+    /* White hot-centre */
+    .lab-glow-card::after {
+      background-image: radial-gradient(
+        calc(var(--spotlight-size) * 0.5) calc(var(--spotlight-size) * 0.5) at
+        calc(var(--x, -9999) * 1px) calc(var(--y, -9999) * 1px),
+        hsl(0 100% 100% / 0.08), transparent 100%
+      );
+    }
+
+    /* Desktop two-column grid for case studies */
+    @media (min-width: 768px) {
+      .cs-grid { grid-template-columns: 1fr 1fr !important; }
+    }
+
+    /* ═══════════════════════════════════════════════════
+       MOBILE  ≤ 768 px  — all overrides live here only
+    ═══════════════════════════════════════════════════ */
+    @media (max-width: 768px) {
+
+      /* ── Global ── */
+      body { overflow-x: hidden !important; }
+
+      /* ── Nav: reduce to avoid overflow on small screens ── */
+      .nav-link { font-size: 11px !important; padding: 6px 8px !important; }
+
+      /* ── Section padding ── */
+      #about   { padding: 40px 20px !important; box-sizing: border-box !important; }
+      #lab     { padding: 40px 20px !important; box-sizing: border-box !important; }
+      #skills  { padding: 40px 20px !important; box-sizing: border-box !important; }
+      #contact { padding: 40px 20px !important; box-sizing: border-box !important; }
+      #work > div:first-child { padding: 40px 20px !important; box-sizing: border-box !important; }
+      .cs-grid { padding: 40px 20px !important; gap: 2rem !important; box-sizing: border-box !important; }
+
+      /* ── Enforce minimum 12 px on all small text ── */
+      .tag, .tag-white, .tag-ghost, .tag-teal {
+        font-size: 12px !important; height: auto !important; padding: 5px 10px !important;
+      }
+      .cs-pill     { font-size: 12px !important; height: auto !important; padding: 4px 10px !important; }
+      .section-label { font-size: 12px !important; }
+      footer span, footer a { font-size: 12px !important; }
+      /* mono base */
+      .font-mono { font-size: 12px; }
+      /* body text bumped to 14 px */
+      p.font-mono { font-size: 14px !important; }
+      #about p    { font-size: 14px !important; }
+
+      /* ── Hero mobile: first screen = label + headline + video only ── */
+
+      /* Headline font size */
+      .hero-line {
+        font-size: clamp(3rem, 13vw, 4.2rem) !important;
+        white-space: normal !important;
+        letter-spacing: -1px !important;
+      }
+
+      /* Outer column: top-aligned flex, padding-top 80px clears fixed nav */
+      #hero-sticky > div:first-child {
+        justify-content: flex-start !important;
+        padding: 80px 20px 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+      }
+
+      /* Inner group: flex column that fills full remaining height */
+      #hero-sticky > div:first-child > div {
+        display: flex !important;
+        flex-direction: column !important;
+        flex: 1 !important;
+        min-height: 0 !important;
+        gap: 0 !important;
+      }
+
+      /* 1 — Label */
+      #hero-label {
+        order: 1;
+        flex-shrink: 0;
+        font-size: 12px !important;
+        margin-top: 24px !important;
+        margin-bottom: 16px !important;
+      }
+
+      /* 2 — Headline slot (height for 3 lines at new font size) */
+      #hero-hl {
+        order: 2;
+        flex-shrink: 0;
+        height: 11rem !important;
+        margin-bottom: 0 !important;
+      }
+
+      /* 3 — Robot video: fills ALL remaining vertical space */
+      #hero-mobile-video-wrap {
+        order: 3;
+        flex: 1 !important;
+        min-height: 0 !important;
+        width: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+        opacity: 1;
+      }
+      #hero-mobile-video-wrap video {
+        width: 120% !important;
+        margin-left: -10% !important;
+        height: 100% !important;
+        max-height: none !important;
+        object-fit: contain !important;
+        display: block !important;
+      }
+
+      /* 4 — Paragraph: always visible on mobile */
+      #hero-subtext {
+        order: 4;
+        flex-shrink: 0;
+        display: block !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        margin-top: 12px !important;
+        font-size: 13px !important;
+      }
+
+      /* 5 — Button + stats: always visible on mobile */
+      #hero-cta-stats {
+        order: 5;
+        flex-shrink: 0;
+        display: flex !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        margin-top: 8px !important;
+        margin-bottom: 48px !important;
+      }
+
+      /* Stats numbers min 14px, labels min 12px */
+      #hero-cta-stats .font-playfair { font-size: clamp(1rem, 5vw, 1.5rem) !important; line-height: 1 !important; }
+      #hero-cta-stats .font-mono     { font-size: 12px !important; }
+
+      /* Spacing between hero and marquee */
+      .marquee-wrapper { margin-top: 0 !important; }
+
+      /* ── Section headings ── */
+      h2.font-playfair { font-size: clamp(1.8rem, 7vw, 2.5rem) !important; }
+      /* Contact headline can be larger — it is the focal element */
+      #contact h2.font-playfair { font-size: clamp(2rem, 9vw, 3.5rem) !important; }
+
+      /* ── Case studies ── */
+
+      /* Ghost number: off on mobile — wastes space */
+      .cs-ghost-num { display: none !important; }
+
+      /* CS01: full-height pinned section on mobile */
+      #case-study-01 {
+        min-height: 100vh !important;
+        padding-top: 0 !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        justify-content: flex-start !important;
+      }
+
+      /* CS02: full-height pinned section — same as CS01 */
+      #case-study-02 {
+        min-height: 100vh !important;
+        padding-top: 0 !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        justify-content: flex-start !important;
+      }
+
+      /* Both grids: flex column, full width, fills section height */
+      #case-study-01 .cs-grid,
+      #case-study-02 .cs-grid {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-height: 100vh !important;
+        box-sizing: border-box !important;
+        overflow: hidden !important;
+        padding: 80px 20px 28px !important;
+        gap: 0.6rem !important;
+      }
+
+      /* Text wrap becomes invisible box — children flow directly into cs-grid */
+      .cs-text-wrap { display: contents !important; }
+
+      /* Explicit mobile order: company → headline → tagline → pills → stats → video → button */
+      .cs-meta        { order: 1 !important; }
+      .cs-title       { order: 2 !important; }
+      .cs-tagline     { order: 3 !important; }
+      .cs-pills-m     { order: 4 !important; display: flex !important; flex-wrap: wrap !important; width: 100% !important; gap: 0.4rem !important; margin-bottom: 0.75rem !important; }
+      .cs-stats       { order: 5 !important; margin-top: 0.5rem !important; }
+      .cs-mockup-wrap { order: 6 !important; flex: 1 !important; min-height: 0 !important; width: 100% !important; display: flex !important; align-items: center !important; }
+      .cs-cta         { order: 7 !important; }
+
+      /* Meta: company + year only (pills hidden on mobile), left-aligned */
+      .cs-meta { display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: flex-start !important; width: 100% !important; gap: 4px 8px !important; }
+      .cs-meta > span { font-size: 12px !important; }
+      .cs-pills-d { display: none !important; }
+
+      /* More breathing room below tagline */
+      .cs-tagline { margin-bottom: 0.75rem !important; }
+
+      /* Case study headline + tagline: full width, left-aligned */
+      .cs-title   { font-size: clamp(1.8rem, 7vw, 2.5rem) !important; width: 100% !important; }
+      .cs-tagline { width: 100% !important; }
+
+      /* Stats: 3-col grid, full width, divider on top */
+      .cs-stats {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        width: 100% !important;
+        border-top: 1px solid #1e1e1e !important;
+        padding-top: 1rem !important;
+        margin-top: 0.25rem !important;
+      }
+      .cs-stats .font-playfair { font-size: clamp(1.5rem, 6vw, 2rem) !important; }
+      .cs-stats span[style*="font-size:9px"],
+      .cs-stats span[style*="font-size: 9px"] { font-size: 10px !important; text-transform: none !important; letter-spacing: 0.3px !important; }
+
+      /* Button: full width, centred */
+      .cs-cta { width: 100% !important; justify-content: center !important; }
+
+      /* Video: fills available space in mockup-wrap */
+      .cs-mockup-wrap video {
+        width: 100% !important;
+        height: 100% !important;
+        max-height: 280px !important;
+        object-fit: contain !important;
+        border-radius: 8px !important;
+        filter: drop-shadow(0 0 20px rgba(0,191,165,0.1)) !important;
+      }
+
+      /* Hide browser chrome frame */
+      .cs-browser-chrome { display: none !important; }
+
+      /* ── Skills ── */
+      #skills-grid { grid-template-columns: 1fr !important; }
+
+      /* ── Contact ── */
+      .contact-row { height: auto !important; min-height: 60px; }
+
+      /* ── Footer ── */
+      footer { padding: 0 20px !important; height: auto !important; min-height: 60px; }
+
+    }
+  </style>
+</head>
+<body class="bg-[#111] text-white overflow-x-hidden">
+
+  <!-- ══════════════════════════════════════════════
+       NAV
+  ══════════════════════════════════════════════ -->
+  <nav id="main-nav" class="fixed top-0 left-0 right-0 z-50 bg-[rgba(17,17,17,0.92)] backdrop-blur-md border-b border-[#2e2e2e]">
+    <div class="flex items-center justify-between px-6 md:px-12 h-[70px]">
+      <!-- Logo -->
+      <a href="#hero" class="font-playfair font-bold text-[22px] text-[#f2f2f2] tracking-[0.45px] hover:text-[#0aaba4] transition-colors shrink-0">Rika.</a>
+
+      <!-- Desktop nav pill -->
+      <div class="nav-pill rounded-[63px] hidden md:flex items-center px-1 py-1 gap-0.5">
+        <a href="#about"   class="nav-link" data-section="about">ABOUT</a>
+        <a href="#work"    class="nav-link" data-section="work">WORK</a>
+        <a href="#lab"     class="nav-link" data-section="lab">THE LAB</a>
+        <a href="#skills"  class="nav-link" data-section="skills">SKILLS</a>
+      </div>
+
+      <!-- Desktop contact button + hamburger -->
+      <div class="flex items-center gap-3">
+        <a href="#contact" class="hidden md:inline-flex items-center" style="border:1px solid #0aaba4;color:#0aaba4;padding:8px 20px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;background:transparent;cursor:pointer;transition:background 0.2s ease,color 0.2s ease;text-decoration:none;" onmouseover="this.style.background='#0aaba4';this.style.color='#111111'" onmouseout="this.style.background='transparent';this.style.color='#0aaba4'">CONTACT</a>
+        <!-- Hamburger (mobile only) -->
+        <button id="hamburger" class="md:hidden flex flex-col gap-[5px] p-2" aria-label="Open menu">
+          <span class="block w-6 h-px bg-[#f2f2f2] transition-all"></span>
+          <span class="block w-6 h-px bg-[#f2f2f2] transition-all"></span>
+          <span class="block w-4 h-px bg-[#f2f2f2] transition-all"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile menu drawer -->
+    <div id="mobile-menu" class="md:hidden flex-col bg-[#111] border-t border-[#2e2e2e] px-6 py-4 gap-1">
+      <a href="#about"   class="nav-link block py-3 border-b border-[#1e1e1e]" data-section="about">ABOUT</a>
+      <a href="#work"    class="nav-link block py-3 border-b border-[#1e1e1e]" data-section="work">WORK</a>
+      <a href="#lab"     class="nav-link block py-3 border-b border-[#1e1e1e]" data-section="lab">THE LAB</a>
+      <a href="#skills"  class="nav-link block py-3 border-b border-[#1e1e1e]" data-section="skills">SKILLS</a>
+      <a href="#contact" class="nav-link block py-3" data-section="contact">CONTACT</a>
+    </div>
+  </nav>
+
+  <!-- ══════════════════════════════════════════════
+       HERO  (200vh — sticky inner panel)
+  ══════════════════════════════════════════════ -->
+  <section id="hero" style="height:100vh; background:#000000; overflow:hidden; position:relative;">
+
+    <!-- Sticky panel -->
+    <div id="hero-sticky" class="flex flex-col md:flex-row"
+         style="height:100vh; position:relative;">
+
+      <!-- ── Text column: centred group, never spreads on tall screens ── -->
+      <div style="display:flex; flex-direction:column; justify-content:center;
+                  position:relative; z-index:2; width:100%; flex-shrink:0; height:100vh;
+                  padding:0 3rem; box-sizing:border-box;">
+
+        <!-- All content as one tight vertical group -->
+        <div style="display:flex; flex-direction:column; gap:clamp(1rem,2vh,2rem);">
+
+          <!-- Label -->
+          <p id="hero-label" class="font-mono" style="font-size:12px; color:#555; letter-spacing:2px; text-transform:uppercase; margin:0;">
+            UX/UI Designer &amp; Frontend Developer — SAAS Specialist
+          </p>
+
+          <!-- Headline -->
+          <div id="hero-hl" style="position:relative; height:clamp(9rem,21vw,24rem);">
+            <!-- Phase 1 wrapper — 3 lines, centred in container -->
+            <div style="position:absolute; top:50%; left:0; transform:translateY(-50%);">
+              <div id="p1-0" class="hero-line" style="color:#e8e8e8;">Making the</div>
+              <div id="p1-1" class="hero-line" style="color:#00BFA5; font-style:italic;">complex</div>
+              <div id="p1-2" class="hero-line hero-line-ghost">invisible.</div>
+            </div>
+            <!-- Phase 2 wrapper — 2 lines, same vertical centre as Phase 1 -->
+            <div style="position:absolute; top:50%; left:0; transform:translateY(-50%);">
+              <div id="p2-0" class="hero-line" style="color:#e8e8e8; opacity:0; transform:translateY(120px);">Turning ideas</div>
+              <div id="p2-1" class="hero-line" style="opacity:0; transform:translateY(120px);">
+                <span style="color:#e8e8e8;">into </span><span style="color:#00BFA5; font-style:italic;">reality.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Subtext -->
+          <p id="hero-subtext" class="font-mono" style="font-size:13px; color:#888; line-height:1.85; max-width:540px; margin:0;">
+            Senior UX/UI Designer specialising in data-dense SaaS tools and accessible digital platforms. I don't just design — I build.
+          </p>
+
+          <!-- CTA + Stats -->
+          <div id="hero-cta-stats" class="flex flex-col sm:flex-row items-start sm:items-center gap-6 sm:gap-12">
+            <a href="#work" class="btn-teal shrink-0">View Case Studies →</a>
+            <div class="flex items-center gap-8 sm:gap-10">
+              <div class="flex flex-col gap-1.5">
+                <span class="font-playfair font-bold text-[#f2f2f2]" style="font-size:clamp(1.5rem,3vw,2rem);line-height:1;">5+</span>
+                <span class="font-mono text-[#555]" style="font-size:12px;letter-spacing:1.19px;text-transform:uppercase;">Years Experience</span>
+              </div>
+              <div class="flex flex-col gap-1.5">
+                <span class="font-playfair font-bold text-[#f2f2f2]" style="font-size:clamp(1.5rem,3vw,2rem);line-height:1;">3</span>
+                <span class="font-mono text-[#555]" style="font-size:12px;letter-spacing:1.19px;text-transform:uppercase;">Major Products</span>
+              </div>
+              <div class="flex flex-col gap-1.5">
+                <span class="font-playfair font-bold text-[#f2f2f2]" style="font-size:clamp(1.5rem,3vw,2rem);line-height:1;">∞</span>
+                <span class="font-mono text-[#555]" style="font-size:12px;letter-spacing:1.19px;text-transform:uppercase;">Problems Solved</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mobile video: below stats (reordered via CSS on mobile) -->
+          <div id="hero-mobile-video-wrap" class="block md:hidden" style="width:100%; transform-origin:center top; will-change:transform,opacity;">
+            <video id="hero-video-mobile" src="ux_future.mp4" muted playsinline preload="auto"
+              style="width:100%; display:block; will-change:transform;"></video>
+          </div>
+
+        </div><!-- /tight group -->
+      </div>
+
+      <!-- Desktop video: absolute, right-aligned bottom, behind text -->
+      <div class="hidden md:block"
+           style="position:absolute; right:0; bottom:0;
+                  width:min(875px,46vw); height:min(711px,78vh); z-index:1;">
+        <video id="hero-video" src="ux_future.mp4" muted playsinline preload="auto"
+          style="width:100%; height:100%; object-fit:contain; object-position:bottom;
+                 will-change:transform;"></video>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       MARQUEE
+  ══════════════════════════════════════════════ -->
+  <div class="bg-[#111] border-t border-b border-[#2e2e2e] py-3 overflow-hidden marquee-wrapper">
+    <div class="marquee-track flex items-center gap-8 w-max">
+      <span class="font-mono text-[10px] md:text-[11px] text-[#555] tracking-[1.57px] uppercase">UX Strategy</span><span class="bg-[#0aaba4] rounded-sm w-1 h-1 shrink-0 inline-block"></span>
+      <span class="font-mono text-[10px] md:text-[11px] text-[#555] tracking-[1.57px] uppercase">UI Design</span><span class="bg-[#0aaba4] rounded-sm w-1 h-1 shrink-0 inline-block"></span>
+      <span class="font-mono text-[10px] md:text-[11px] text-[#555] tracking-[1.57px] uppercase">Design Systems</span><span class="bg-[#0aaba4] rounded-sm w-1 h-1 shrink-0 inline-block"></span>
+      <span class="font-mono text-[10px] md:text-[11px] text-[#555] tracking-[1.57px] uppercase">Figma Prototyping</span><span class="bg-[#0aaba4] rounded-sm w-1 h-1 shrink-0 inline-block"></span>
+      <span class="font-mono text-[10px] md:text-[11px] text-[#555] tracking-[1.57px] uppercase">Accessibility</span><span class="bg-[#0aaba4] rounded-sm w-1 h-1 shrink-0 inline-block"></span>
+      <span class="font-mono text-[10px] md:text-[11px] text-[#555] tracking-[1.57px] uppercase">Tailwind CSS</span><span class="bg-[#0aaba4] rounded-sm w-1 h-1 shrink-0 inline-block"></span>
+      <span class="font-mono text-[10px] md:text-[11px] text-[#555] tracking-[1.57px] uppercase">Frontend Development</span><span class="bg-[#0aaba4] rounded-sm w-1 h-1 shrink-0 inline-block"></span>
+      <span class="font-mono text-[10px] md:text-[11px] text-[#555] tracking-[1.57px] uppercase">SaaS Products</span><span class="bg-[#0aaba4] rounded-sm w-1 h-1 shrink-0 inline-block"></span>
+      <span class="font-mono text-[10px] md:text-[11px] text-[#555] tracking-[1.57px] uppercase">User Research</span><span class="bg-[#0aaba4] rounded-sm w-1 h-1 shrink-0 inline-block"></span>
+      <span class="font-mono text-[10px] md:text-[11px] text-[#555] tracking-[1.57px] uppercase">Information Architecture</span><span class="bg-[#0aaba4] rounded-sm w-1 h-1 shrink-0 inline-block"></span>
+      <!-- duplicate for loop -->
+      <span class="font-mono text-[10px] md:text-[11px] text-[#555] tracking-[1.57px] uppercase">UX Strategy</span><span class="bg-[#0aaba4] rounded-sm w-1 h-1 shrink-0 inline-block"></span>
+      <span class="font-mono text-[10px] md:text-[11px] text-[#555] tracking-[1.57px] uppercase">UI Design</span><span class="bg-[#0aaba4] rounded-sm w-1 h-1 shrink-0 inline-block"></span>
+      <span class="font-mono text-[10px] md:text-[11px] text-[#555] tracking-[1.57px] uppercase">Design Systems</span><span class="bg-[#0aaba4] rounded-sm w-1 h-1 shrink-0 inline-block"></span>
+      <span class="font-mono text-[10px] md:text-[11px] text-[#555] tracking-[1.57px] uppercase">Figma Prototyping</span><span class="bg-[#0aaba4] rounded-sm w-1 h-1 shrink-0 inline-block"></span>
+      <span class="font-mono text-[10px] md:text-[11px] text-[#555] tracking-[1.57px] uppercase">Accessibility</span><span class="bg-[#0aaba4] rounded-sm w-1 h-1 shrink-0 inline-block"></span>
+      <span class="font-mono text-[10px] md:text-[11px] text-[#555] tracking-[1.57px] uppercase">Tailwind CSS</span><span class="bg-[#0aaba4] rounded-sm w-1 h-1 shrink-0 inline-block"></span>
+      <span class="font-mono text-[10px] md:text-[11px] text-[#555] tracking-[1.57px] uppercase">Frontend Development</span><span class="bg-[#0aaba4] rounded-sm w-1 h-1 shrink-0 inline-block"></span>
+      <span class="font-mono text-[10px] md:text-[11px] text-[#555] tracking-[1.57px] uppercase">SaaS Products</span><span class="bg-[#0aaba4] rounded-sm w-1 h-1 shrink-0 inline-block"></span>
+      <span class="font-mono text-[10px] md:text-[11px] text-[#555] tracking-[1.57px] uppercase">User Research</span><span class="bg-[#0aaba4] rounded-sm w-1 h-1 shrink-0 inline-block"></span>
+      <span class="font-mono text-[10px] md:text-[11px] text-[#555] tracking-[1.57px] uppercase">Information Architecture</span><span class="bg-[#0aaba4] rounded-sm w-1 h-1 shrink-0 inline-block"></span>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       ABOUT ME
+  ══════════════════════════════════════════════ -->
+  <section id="about" class="bg-[#111] py-16 md:py-20 px-6 md:px-12" style="position:relative; z-index:1;">
+    <div class="flex flex-col md:flex-row items-start md:items-center gap-10 md:gap-16 max-w-[1760px] mx-auto">
+      <!-- Photo -->
+      <div class="shrink-0 w-full md:w-auto" style="max-width: min(500px, 100%);">
+        <img src="assets/about-photo.png" alt="Rika" class="w-full aspect-square object-cover" style="filter: grayscale(100%);">
+      </div>
+
+      <!-- Content -->
+      <div class="flex flex-col gap-7 min-w-0 flex-1">
+        <div class="flex flex-col gap-5">
+          <div class="flex items-center gap-4">
+            <span class="section-label">01 — About</span>
+            <div class="divider"></div>
+          </div>
+          <h2 class="font-playfair font-bold text-[#f2f2f2] leading-[1.1] tracking-[-0.6px]" style="font-size: clamp(32px, 3.8vw, 60px);">
+            Digital architect.<br>
+            Complexity <em class="italic text-[#0aaba4]">tamer.</em><br>
+            Builder.
+          </h2>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+          <span class="tag">UX Strategy</span>
+          <span class="tag">Design Systems</span>
+          <span class="tag">Frontend Dev</span>
+          <span class="tag">Accessibility</span>
+          <span class="tag">SaaS</span>
+          <span class="tag">Healthcare UX</span>
+          <span class="tag">Figma</span>
+          <span class="tag">Tailwind CSS</span>
+        </div>
+
+        <div class="flex flex-col gap-6 font-mono text-[12px] md:text-[12.8px] text-[#aaa] leading-[1.9]">
+          <p>I'm a Senior UX/UI Designer with a deliberate edge in frontend development. Like an architect of digital experiences, I build structures that make even the most complex content clear, accessible, and intuitive — ensuring every element of a project works in concert.</p>
+          <p>I don't wait for someone to open the game. I see the field, identify opportunities, and move. Challenges aren't obstacles to me — they're creative puzzles to be solved with tenacity, structure, and a broad skill set. And if I'm ever missing a capability? I learn it — fast, focused, and with genuine enthusiasm.</p>
+          <p>My work spans data-dense SaaS platforms where CFOs and project managers need real-time clarity, to emotionally complex healthcare journeys where simplicity is a lifeline. The thread through all of it: making the complex invisible.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       CASE STUDIES
+  ══════════════════════════════════════════════ -->
+  <section id="work" style="background:#111; position:relative; z-index:1;">
+
+    <!-- Section header -->
+    <div style="padding:6rem 3rem 5rem; border-bottom:1px solid #1a1a1a;">
+      <div class="flex items-center gap-4" style="margin-bottom:2.5rem;">
+        <span class="section-label">02 — Case Studies</span>
+        <div class="divider"></div>
+      </div>
+      <h2 class="font-playfair font-bold text-[#f2f2f2]" style="font-size:clamp(28px,3.2vw,48px); line-height:1.15; max-width:600px;">
+        Work that turns data <span class="text-[#0aaba4]">chaos</span><br>
+        into decision <span class="text-[#0aaba4]">clarity</span>.
+      </h2>
+    </div>
+
+    <!-- ══ Case 01: consalio — Mockup LEFT · Text RIGHT ══ -->
+    <div id="case-study-01" class="cs-section" style="min-height:100vh; overflow:hidden; position:relative; z-index:1; display:flex; align-items:center; border-bottom:1px solid #1a1a1a;">
+
+      <!-- Ghost number -->
+      <span class="cs-ghost-num" aria-hidden="true"
+        style="position:absolute; right:-0.5rem; top:50%; transform:translateY(-55%);
+               font-family:'Playfair Display',serif; font-weight:800;
+               font-size:clamp(8rem,20vw,18rem); color:rgba(255,255,255,0.04);
+               line-height:1; pointer-events:none; user-select:none; letter-spacing:-0.05em; z-index:0;">01</span>
+
+      <!-- Two-column grid -->
+      <div class="cs-grid" style="display:grid; grid-template-columns:1fr; gap:4rem; width:100%; padding:6rem 3rem; align-items:center; position:relative; z-index:1;">
+
+        <!-- Mockup — browser frame — LEFT on desktop -->
+        <div class="cs-mockup-wrap" style="will-change:transform; order:1;">
+          <div style="border-radius:12px; overflow:hidden; position:relative;">
+            <video id="laptop-video" src="laptop.mp4"
+              muted playsinline preload="auto"
+              style="width:100%; display:block;"></video>
+            <div aria-hidden="true" style="position:absolute; inset:0; pointer-events:none; z-index:1;
+              background:
+                linear-gradient(to left, #101010 0%, transparent 25%, transparent 75%, #101010 100%),
+                linear-gradient(to top, #101010 0%, transparent 25%),
+                linear-gradient(to bottom, #101010 0%, transparent 25%);"></div>
+          </div>
+        </div>
+
+        <!-- Text — RIGHT on desktop -->
+        <div class="cs-text-wrap" style="display:flex; flex-direction:column; gap:1.5rem; order:2;">
+
+          <div class="cs-meta" style="display:flex; align-items:center; gap:1.25rem; flex-wrap:wrap;">
+            <span style="font-family:'DM Mono',monospace; font-size:12px; color:#555; letter-spacing:1.87px; text-transform:uppercase;">consalio GmbH</span>
+            <span style="font-family:'DM Mono',monospace; font-size:12px; color:#444;">2023 — 2026</span>
+            <div class="cs-pills-d" style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+              <span class="cs-pill">SaaS</span>
+              <span class="cs-pill">Data Viz</span>
+              <span class="cs-pill">Design System</span>
+              <span class="cs-pill">Frontend</span>
+            </div>
+          </div>
+
+          <h3 class="cs-title" style="font-family:'Playfair Display',serif; font-weight:800; font-size:clamp(2rem,4vw,3.5rem); color:#e8e8e8; line-height:1.1; letter-spacing:-0.5px;">The Live Budget Cockpit</h3>
+
+          <p class="cs-tagline" style="font-family:'DM Mono',monospace; font-style:italic; font-size:12px; color:#00BFA5; letter-spacing:0.5px; line-height:1.6;">Replacing Excel chaos with real-time project intelligence</p>
+
+          <div class="cs-pills-m">
+            <span class="cs-pill">SaaS</span>
+            <span class="cs-pill">Data Viz</span>
+            <span class="cs-pill">Design System</span>
+            <span class="cs-pill">Frontend</span>
+          </div>
+
+          <div class="cs-stats" style="display:grid; grid-template-columns:repeat(3,1fr); gap:1.5rem; padding-top:1.5rem; border-top:1px solid #2e2e2e; margin-top:0.25rem;">
+            <div>
+              <span class="font-playfair" style="font-weight:700; font-style:italic; font-size:clamp(1.5rem,2.2vw,2rem); color:#f2f2f2; line-height:1; display:block;">&lt;5</span>
+              <span style="font-family:'DM Mono',monospace; font-size:12px; color:#555; letter-spacing:1px; text-transform:uppercase; line-height:1.5; display:block; margin-top:0.5rem;">Clicks to "First Value"</span>
+            </div>
+            <div>
+              <span class="font-playfair" style="font-weight:700; font-style:italic; font-size:clamp(1.5rem,2.2vw,2rem); color:#f2f2f2; line-height:1; display:block;">↓60%</span>
+              <span style="font-family:'DM Mono',monospace; font-size:12px; color:#555; letter-spacing:1px; text-transform:uppercase; line-height:1.5; display:block; margin-top:0.5rem;">Complexity Reduced</span>
+            </div>
+            <div>
+              <span class="font-playfair" style="font-weight:700; font-style:italic; font-size:clamp(1.5rem,2.2vw,2rem); color:#f2f2f2; line-height:1; display:block;">1 System</span>
+              <span style="font-family:'DM Mono',monospace; font-size:12px; color:#555; letter-spacing:1px; text-transform:uppercase; line-height:1.5; display:block; margin-top:0.5rem;">Unified Platform</span>
+            </div>
+          </div>
+
+          <a href="consalio.html" class="btn-teal cs-cta" style="width:fit-content; margin-top:0.5rem;">View Case Study →</a>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ Case 02: ecaria — Text LEFT · Mockup RIGHT ══ -->
+    <div id="case-study-02" class="cs-section" style="min-height:100vh; overflow:hidden; position:relative; z-index:1; display:flex; align-items:center;">
+
+      <!-- Ghost number -->
+      <span class="cs-ghost-num" aria-hidden="true"
+        style="position:absolute; left:-0.5rem; top:50%; transform:translateY(-55%);
+               font-family:'Playfair Display',serif; font-weight:800;
+               font-size:clamp(8rem,20vw,18rem); color:rgba(255,255,255,0.04);
+               line-height:1; pointer-events:none; user-select:none; letter-spacing:-0.05em; z-index:0;">02</span>
+
+      <!-- Two-column grid -->
+      <div class="cs-grid" style="display:grid; grid-template-columns:1fr; gap:4rem; width:100%; padding:6rem 3rem; align-items:center; position:relative; z-index:1;">
+
+        <!-- Text — LEFT on desktop -->
+        <div class="cs-text-wrap" style="display:flex; flex-direction:column; gap:1.5rem; order:1;">
+
+          <div class="cs-meta" style="display:flex; align-items:center; gap:1.25rem; flex-wrap:wrap;">
+            <span style="font-family:'DM Mono',monospace; font-size:12px; color:#555; letter-spacing:1.87px; text-transform:uppercase;">ecaria GmbH</span>
+            <span style="font-family:'DM Mono',monospace; font-size:12px; color:#444;">2021 — 2022</span>
+            <div class="cs-pills-d" style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+              <span class="cs-pill">Healthcare UX</span>
+              <span class="cs-pill">Accessibility</span>
+              <span class="cs-pill">Mobile First</span>
+              <span class="cs-pill">Research</span>
+            </div>
+          </div>
+
+          <h3 class="cs-title" style="font-family:'Playfair Display',serif; font-weight:800; font-size:clamp(2rem,4vw,3.5rem); color:#e8e8e8; line-height:1.1; letter-spacing:-0.5px;">The Care Compass</h3>
+
+          <p class="cs-tagline" style="font-family:'DM Mono',monospace; font-style:italic; font-size:12px; color:#00BFA5; letter-spacing:0.5px; line-height:1.6;">Designing calm into crisis — accessibility-first healthcare UX</p>
+
+          <div class="cs-pills-m">
+            <span class="cs-pill">Healthcare UX</span>
+            <span class="cs-pill">Accessibility</span>
+            <span class="cs-pill">Mobile First</span>
+            <span class="cs-pill">Research</span>
+          </div>
+
+          <div class="cs-stats" style="display:flex; flex-wrap:wrap; gap:2rem; padding-top:1.5rem; border-top:1px solid #2e2e2e; margin-top:0.25rem;">
+            <div style="min-width:120px;">
+              <span class="font-playfair" style="font-weight:700; font-style:italic; font-size:clamp(1.3rem,1.8vw,1.7rem); color:#f2f2f2; line-height:1; display:block;">↓ Overwhelm</span>
+              <span style="font-family:'DM Mono',monospace; font-size:12px; color:#555; letter-spacing:1px; text-transform:uppercase; line-height:1.5; display:block; margin-top:0.5rem; max-width:150px;">Significant reduction in cognitive overload</span>
+            </div>
+            <div style="min-width:100px;">
+              <span class="font-playfair" style="font-weight:700; font-style:italic; font-size:clamp(1.3rem,1.8vw,1.7rem); color:#f2f2f2; line-height:1; display:block;">1 Decision</span>
+              <span style="font-family:'DM Mono',monospace; font-size:12px; color:#555; letter-spacing:1px; text-transform:uppercase; line-height:1.5; display:block; margin-top:0.5rem; max-width:130px;">Per screen — radical guided flow principle</span>
+            </div>
+            <div style="min-width:100px;">
+              <span class="font-playfair" style="font-weight:700; font-style:italic; font-size:clamp(1.3rem,1.8vw,1.7rem); color:#f2f2f2; line-height:1; display:block;">Self-expl.</span>
+              <span style="font-family:'DM Mono',monospace; font-size:12px; color:#555; letter-spacing:1px; text-transform:uppercase; line-height:1.5; display:block; margin-top:0.5rem; max-width:150px;">Zero onboarding required for new users</span>
+            </div>
+          </div>
+
+          <a href="ecaria.html" class="btn-teal cs-cta" style="width:fit-content; margin-top:0.5rem;">View Case Study →</a>
+
+        </div>
+
+        <!-- Mockup — RIGHT on desktop (matches Case 01 dimensions) -->
+        <div class="cs-mockup-wrap" style="will-change:transform; order:2;">
+          <div style="border-radius:12px; overflow:hidden; position:relative;">
+            <video id="ecaria-video" src="ecaria.mp4"
+              muted playsinline preload="auto"
+              style="width:100%; display:block;"></video>
+            <div aria-hidden="true" style="position:absolute; inset:0; pointer-events:none; z-index:1;
+              background:
+                linear-gradient(to left, #101010 0%, transparent 25%, transparent 75%, #101010 100%),
+                linear-gradient(to top, #101010 0%, transparent 25%),
+                linear-gradient(to bottom, #101010 0%, transparent 25%);"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Gradient fade to next section — no hard edge -->
+      <div aria-hidden="true" style="position:absolute; bottom:0; left:0; right:0; height:180px; background:linear-gradient(to bottom, transparent 0%, #101010 100%); pointer-events:none; z-index:2;"></div>
+
+    </div>
+
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       THE LAB
+  ══════════════════════════════════════════════ -->
+  <section id="lab" class="bg-[#111] pt-16 md:pt-[105px] pb-12 md:pb-16 px-6 md:px-12" style="position:relative; z-index:1;">
+    <div class="flex items-center gap-4" style="margin-bottom:2.5rem;">
+      <span class="section-label">03 — The Lab</span>
+      <div class="divider"></div>
+    </div>
+    <h2 class="font-playfair font-bold text-[#f2f2f2] leading-[1.1] mb-14 md:mb-20" style="font-size: clamp(28px, 3.2vw, 48px); max-width: 534px;">
+      Where ideas become<br>
+      working features — <span class="text-[#0aaba4]">fast</span>.
+    </h2>
+
+    <div class="flex flex-col gap-4 md:gap-6">
+      <!-- Top: 2 large cards -->
+      <div class="flex flex-col md:flex-row gap-4 md:gap-6" style="align-items:stretch;">
+        <div class="lab-glow-card flex-1 p-8 md:p-12 flex flex-col gap-4">
+          <span class="font-mono text-[22px] text-[#0aaba4]">⌗</span>
+          <h3 class="font-syne font-bold text-[16px] md:text-[17px] text-[#f2f2f2]">Charon — Product Switch</h3>
+          <p class="font-mono text-[11px] md:text-[12px] text-[#888] leading-[22px]">
+            When consalio pivoted to a new product direction, I drove the conceptual architecture — content, structure, and design — from day one. I supplied the majority of ideas shaping what Charon became, working across strategy, UX, and visual design simultaneously.
+          </p>
+          <div class="flex gap-2 flex-wrap">
+            <span class="tag-teal">Product Strategy</span>
+            <span class="tag-teal">UX Architecture</span>
+            <span class="tag-teal">Visual Design</span>
+          </div>
+          <div class="w-full mt-2 bg-[#1c1c1c] overflow-hidden" style="aspect-ratio: 812/507;">
+            <video src="charon.mp4" autoplay loop muted playsinline class="w-full h-full object-cover"></video>
+          </div>
+        </div>
+
+        <div class="lab-glow-card flex-1 p-8 md:p-12 flex flex-col gap-4">
+          <span class="font-mono text-[22px] text-[#0aaba4]">✦</span>
+          <h3 class="font-syne font-bold text-[16px] md:text-[17px] text-[#f2f2f2]">Sticky Notes — Vibe Coded to Production</h3>
+          <p class="font-mono text-[11px] md:text-[12px] text-[#888] leading-[22px]">
+            I didn't just design the sticky note feature for Charon — I built it. Using AI-assisted vibe coding and Tailwind CSS, I took the feature from sketch to working implementation and integrated it into the live product myself. Idea → code → shipped. No handoff delay.
+          </p>
+          <div class="flex gap-2 flex-wrap">
+            <span class="tag-teal">Tailwind CSS</span>
+            <span class="tag-teal">JavaScript</span>
+            <span class="tag-teal">AI-assisted</span>
+            <span class="tag-teal">Frontend</span>
+          </div>
+          <!-- Sticky Note interactive demo -->
+          <div id="sticky-demo" style="height:100%; min-height:0; flex:1; width:100%; overflow:hidden; border-radius:0; border:1px solid #2e2e2e; background:#111111; position:relative;">
+
+            <!-- Label -->
+            <div style="position:relative; z-index:100; display:flex; align-items:center; gap:8px; padding:1rem 1.5rem 0.5rem 1.5rem; font-family:'DM Mono',monospace; font-size:0.75rem; letter-spacing:0.12em; color:#ffffff; text-transform:uppercase;">
+              TRY YOURSELF HERE
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00BFA5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12h14M13 6l6 6-6 6"/>
+              </svg>
+            </div>
+
+            <!-- Stack -->
+            <div id="note-stack-demo" style="position:absolute; top:3.5rem; left:24px; width:160px; height:160px; cursor:pointer;" title="Click to add a note">
+              <div style="position:absolute; inset:0; transform:translate(4px,4px) rotate(5deg); border-radius:2px; background:#166534; box-shadow:0 1px 3px rgba(0,0,0,0.2);"></div>
+              <div style="position:absolute; inset:0; transform:translate(-2px,8px) rotate(-1.8deg); border-radius:2px; background:#16a34a; box-shadow:0 1px 3px rgba(0,0,0,0.2);"></div>
+              <div style="position:absolute; inset:0; border-radius:2px; background:#dcfce7; border:1px solid #4ade80; box-shadow:0 4px 12px rgba(0,0,0,0.15); display:flex; align-items:center; justify-content:center;">
+                <div style="text-align:center; padding:0 12px;">
+                  <div style="font-weight:600; color:#16a34a; font-size:13px; font-family:'Lexend',sans-serif;">Sticky Notes</div>
+                  <div style="font-size:12px; color:#374151; margin-top:4px; font-family:'Lexend',sans-serif;">Click to add a note</div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Note template (scoped to demo) -->
+          <template id="note-template-demo">
+            <div class="note" style="position:absolute; left:0; top:0; width:224px; border-radius:2px; box-shadow:0 8px 24px rgba(0,0,0,0.18); border:1px solid #16a34a; background:#dcfce7; user-select:none; display:flex; flex-direction:column; z-index:1;">
+              <div class="note-header" style="border-radius:2px 2px 0 0; background:#16a34a; color:#fff; padding:8px 12px; cursor:move; display:flex; align-items:center; gap:8px;">
+                <div contenteditable="true" class="note-title" data-placeholder="Headline…" aria-label="Note headline"
+                  style="flex:1; font-weight:600; outline:none; white-space:pre-wrap; line-height:1.4; min-height:1.5rem; font-family:'Lexend',sans-serif; font-size:13px;"></div>
+                <button class="note-close" title="Delete note" aria-label="Delete note"
+                  style="flex-shrink:0; background:none; border:none; color:rgba(255,255,255,0.8); cursor:pointer; font-size:14px; line-height:1; padding:2px 4px;">✕</button>
+              </div>
+              <div class="note-body" style="padding:12px; flex:1; min-height:0; overflow:auto;">
+                <div class="note-editor" contenteditable="true" aria-label="Note text" data-placeholder="Write something…"
+                  style="outline:none; min-height:90px; background:transparent; font-size:12px; line-height:1.6; font-family:'Lexend',sans-serif; color:#1f2937;"></div>
+                <div style="margin-top:10px; display:flex; align-items:center; gap:4px; border-top:1px solid rgba(0,0,0,0.12); padding-top:8px;">
+                  <button class="tb-btn tb-bold" title="Bold" aria-label="Bold"
+                    style="border:none; background:none; cursor:pointer; width:28px; height:28px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; color:#374151;">B</button>
+                  <button class="tb-btn tb-ul" title="Bulleted list" aria-label="Bulleted list"
+                    style="border:none; background:none; cursor:pointer; width:28px; height:28px; border-radius:6px; display:flex; align-items:center; justify-content:center; color:#374151;">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/></svg>
+                  </button>
+                  <button class="tb-btn tb-ol" title="Numbered list" aria-label="Numbered list"
+                    style="border:none; background:none; cursor:pointer; width:28px; height:28px; border-radius:6px; display:flex; align-items:center; justify-content:center; color:#374151;">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M8.242 5.992h12m-12 6.003H20.24m-12 5.999h12M4.117 7.495v-3.75H2.99m1.125 3.75H2.99m1.125 0H5.24m-1.92 2.577a1.125 1.125 0 1 1 1.591 1.59l-1.83 1.83h2.16M2.99 15.745h1.125a1.125 1.125 0 0 1 0 2.25H3.74m0-.002h.375a1.125 1.125 0 0 1 0 2.25H2.99"/></svg>
+                  </button>
+                  <div style="margin-left:auto; position:relative;">
+                    <button class="tb-btn tb-color" title="Change color" aria-label="Change color"
+                      style="border:none; cursor:pointer; width:24px; height:24px; border-radius:9999px; border:2px solid #fff; display:flex; align-items:center; justify-content:center; background:transparent;">
+                      <span class="current-color-indicator" style="display:inline-block; width:14px; height:14px; border-radius:9999px; background:#16a34a;"></span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </template>
+
+          <script>
+          (function () {
+            var container  = document.getElementById('sticky-demo');
+            var stackEl    = document.getElementById('note-stack-demo');
+            var tplEl      = document.getElementById('note-template-demo');
+            if (!container || !stackEl || !tplEl) return;
+
+            var zCounter = 10;
+            var openPopover = null;
+
+            var PALETTE = ['#EA580C','#B91C1C','#FBBC05','#16A34A','#1D4ED8','#6D28D9'];
+            var DEFAULT_COLOR = '#16A34A';
+
+            function uid() { return Math.random().toString(36).slice(2); }
+            function clamp(v, lo, hi) { return Math.min(Math.max(v, lo), hi); }
+
+            function containerSize() {
+              return { w: container.clientWidth, h: container.clientHeight };
+            }
+
+            /* ── Placement ── */
+            function placeRandom(note) {
+              var s = containerSize();
+              var nw = note.offsetWidth  || 224;
+              var nh = note.offsetHeight || 200;
+              var pad = 20;
+              note.style.left = clamp(Math.random() * (s.w - nw - pad) + pad, 0, Math.max(0, s.w - nw)) + 'px';
+              note.style.top  = clamp(Math.random() * (s.h - nh - pad) + pad, 0, Math.max(0, s.h - nh)) + 'px';
+              note.style.zIndex = ++zCounter;
+            }
+
+            function placeBesideStack(note) {
+              var stackRect = stackEl.getBoundingClientRect();
+              var cRect     = container.getBoundingClientRect();
+              var sl = stackRect.left - cRect.left;
+              var st = stackRect.top  - cRect.top;
+              var sr = stackRect.right - cRect.left;
+              var gap = 20;
+              var s   = containerSize();
+              var nw  = note.offsetWidth  || 224;
+              var nh  = note.offsetHeight || 200;
+              var nx  = sr + gap;
+              var ny  = st;
+              if (nx + nw > s.w) { nx = Math.max(0, sl - gap - nw); }
+              nx = clamp(nx, 0, Math.max(0, s.w - nw));
+              ny = clamp(ny, 0, Math.max(0, s.h - nh));
+              note.style.left   = nx + 'px';
+              note.style.top    = ny + 'px';
+              note.style.zIndex = ++zCounter;
+            }
+
+            function keepInBounds(note) {
+              var s   = containerSize();
+              var cRect = container.getBoundingClientRect();
+              var nRect = note.getBoundingClientRect();
+              note.style.left = clamp(nRect.left - cRect.left, 0, Math.max(0, s.w - nRect.width))  + 'px';
+              note.style.top  = clamp(nRect.top  - cRect.top,  0, Math.max(0, s.h - nRect.height)) + 'px';
+            }
+
+            /* ── Drag ── */
+            function makeDraggable(note) {
+              var header = note.querySelector('.note-header');
+              var dragging = false, startX = 0, startY = 0, initX = 0, initY = 0, nw = 0, nh = 0;
+
+              function onDown(e) {
+                if (e.button !== undefined && e.button !== 0) return;
+                dragging = true;
+                note.classList.add('dragging');
+                note.style.zIndex = ++zCounter;
+                var p = e.touches ? e.touches[0] : e;
+                startX = p.clientX; startY = p.clientY;
+                var cRect = container.getBoundingClientRect();
+                var nRect = note.getBoundingClientRect();
+                initX = nRect.left - cRect.left;
+                initY = nRect.top  - cRect.top;
+                nw = nRect.width; nh = nRect.height;
+                window.addEventListener('pointermove', onMove);
+                window.addEventListener('pointerup',   onUp, { once: true });
+              }
+              function onMove(e) {
+                if (!dragging) return;
+                var p = e.touches ? e.touches[0] : e;
+                var s = containerSize();
+                note.style.left = clamp(initX + p.clientX - startX, 0, Math.max(0, s.w - nw)) + 'px';
+                note.style.top  = clamp(initY + p.clientY - startY, 0, Math.max(0, s.h - nh)) + 'px';
+              }
+              function onUp() {
+                dragging = false;
+                note.classList.remove('dragging');
+                window.removeEventListener('pointermove', onMove);
+              }
+              header.addEventListener('pointerdown', onDown);
+            }
+
+            /* ── Toolbar ── */
+            function fixLists(root) {
+              root.querySelectorAll('ul').forEach(function(ul){ ul.style.listStyle='disc';    ul.style.paddingLeft='1.25rem'; });
+              root.querySelectorAll('ol').forEach(function(ol){ ol.style.listStyle='decimal'; ol.style.paddingLeft='1.25rem'; });
+            }
+
+            function bindToolbar(note) {
+              var editor  = note.querySelector('.note-editor');
+              var titleEl = note.querySelector('.note-title');
+
+              function applyPH(el) {
+                var ph = el.getAttribute('data-placeholder'); if (!ph) return;
+                function update() {
+                  if (el.textContent.trim() === '') { el.setAttribute('data-empty',''); }
+                  else                              { el.removeAttribute('data-empty'); }
+                }
+                el.addEventListener('input', update); update();
+              }
+              applyPH(titleEl); applyPH(editor);
+
+              [editor, titleEl].forEach(function(el){
+                el.addEventListener('focus', function(){ note.style.zIndex = ++zCounter; });
+              });
+
+              function exec(cmd) { editor.focus(); document.execCommand(cmd, false); fixLists(editor); }
+
+              note.querySelector('.tb-bold').addEventListener('click', function(){ exec('bold'); });
+              note.querySelector('.tb-ul').addEventListener('click',   function(){ exec('insertUnorderedList'); });
+              note.querySelector('.tb-ol').addEventListener('click',   function(){ exec('insertOrderedList'); });
+              note.addEventListener('keydown', function(e){
+                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') { e.preventDefault(); exec('bold'); }
+              });
+              note.querySelector('.note-close').addEventListener('click', function(){ note.remove(); });
+            }
+
+            /* ── Color ── */
+            function withAlpha(hex, a) {
+              var v=hex.replace('#',''), r=parseInt(v.slice(0,2),16), g=parseInt(v.slice(2,4),16), b=parseInt(v.slice(4,6),16);
+              return 'rgba('+r+','+g+','+b+','+a+')';
+            }
+            function lighten(hex, amt) {
+              var v=hex.replace('#',''), r=parseInt(v.slice(0,2),16), g=parseInt(v.slice(2,4),16), b=parseInt(v.slice(4,6),16);
+              var m=function(c){return Math.round(c+(255-c)*amt);}; return 'rgb('+m(r)+','+m(g)+','+m(b)+')';
+            }
+            function midline(hex, amt) {
+              var v=hex.replace('#',''), r=parseInt(v.slice(0,2),16), g=parseInt(v.slice(2,4),16), b=parseInt(v.slice(4,6),16);
+              var m=function(c){return Math.round(c*(1-amt)+120*amt);}; return 'rgb('+m(r)+','+m(g)+','+m(b)+')';
+            }
+            function applyColor(note, hex) {
+              var header = note.querySelector('.note-header');
+              var indicator = note.querySelector('.current-color-indicator');
+              header.style.backgroundColor = hex;
+              note.style.borderColor = midline(hex, 0.25);
+              note.style.backgroundColor = lighten(hex, 0.92);
+              note.querySelectorAll('.tb-btn').forEach(function(btn){
+                btn.onmouseenter = function(){ btn.style.backgroundColor = withAlpha(hex, 0.12); };
+                btn.onmouseleave = function(){ btn.style.backgroundColor = ''; };
+              });
+              if (indicator) indicator.style.backgroundColor = hex;
+              note.dataset.color = hex;
+            }
+
+            function closePopover() {
+              if (openPopover && openPopover._cleanup) { openPopover._cleanup(); }
+              openPopover = null;
+            }
+
+            function openColorPopover(forBtn, onPick) {
+              closePopover();
+              var pop = document.createElement('div');
+              pop.className = 'sn-color-popover';
+
+              var grid = document.createElement('div');
+              grid.className = 'sn-color-grid';
+              PALETTE.forEach(function(hex){
+                var sw = document.createElement('button');
+                sw.type = 'button'; sw.className = 'sn-color-swatch';
+                sw.style.background = hex; sw.title = hex;
+                sw.addEventListener('click', function(e){ e.stopPropagation(); onPick(hex); closePopover(); });
+                grid.appendChild(sw);
+              });
+              pop.appendChild(grid);
+
+              var arrow = document.createElement('div');
+              arrow.className = 'sn-color-arrow';
+              pop.appendChild(arrow);
+              container.appendChild(pop);
+
+              // Position relative to container
+              pop.style.visibility = 'hidden';
+              var cRect  = container.getBoundingClientRect();
+              var bRect  = forBtn.getBoundingClientRect();
+              var bLeft  = bRect.left  - cRect.left;
+              var bTop   = bRect.top   - cRect.top;
+              var bBottom= bRect.bottom- cRect.top;
+              var bMidX  = bLeft + bRect.width / 2;
+              var pw = pop.offsetWidth  || 220;
+              var ph = pop.offsetHeight || 60;
+              var gap = 8;
+              var left  = clamp(bMidX - pw / 2, 8, Math.max(8, container.clientWidth - pw - 8));
+              var fitsTop = bTop - ph - gap >= 8;
+              var top   = fitsTop ? bTop - ph - gap : bBottom + gap;
+              top = clamp(top, 8, Math.max(8, container.clientHeight - ph - 8));
+              pop.style.left = Math.round(left) + 'px';
+              pop.style.top  = Math.round(top)  + 'px';
+              arrow.style.left = Math.round(bMidX - left - 5) + 'px';
+              arrow.style.top  = fitsTop ? (ph - 5) + 'px' : '-5px';
+              pop.style.visibility = 'visible';
+
+              var onDocClick = function(e){ if (!pop.contains(e.target) && e.target !== forBtn) closePopover(); };
+              var onKey      = function(e){ if (e.key === 'Escape') closePopover(); };
+              container.addEventListener('click', onDocClick, { capture: true });
+              document.addEventListener('keydown', onKey);
+              pop._cleanup = function(){
+                container.removeEventListener('click', onDocClick, { capture: true });
+                document.removeEventListener('keydown', onKey);
+                if (pop.parentNode) pop.parentNode.removeChild(pop);
+              };
+              openPopover = pop;
+            }
+
+            function wireColor(note) {
+              var btn = note.querySelector('.tb-color');
+              if (!btn) return;
+              btn.addEventListener('click', function(e){
+                e.stopPropagation();
+                openColorPopover(btn, function(hex){ applyColor(note, hex); });
+              });
+            }
+
+            /* ── Create note ── */
+            function createNote(opts) {
+              opts = opts || {};
+              var node = tplEl.content.firstElementChild.cloneNode(true);
+              node.dataset.id = uid();
+              container.appendChild(node);
+              if (opts.besideStack) { placeBesideStack(node); } else { placeRandom(node); }
+              makeDraggable(node);
+              bindToolbar(node);
+              applyColor(node, DEFAULT_COLOR);
+              wireColor(node);
+              fixLists(node.querySelector('.note-editor'));
+              return node;
+            }
+
+            /* ── Wire stack ── */
+            stackEl.addEventListener('click', function(){
+              var isFirst = container.querySelectorAll('.note').length === 0;
+              createNote({ besideStack: isFirst });
+            });
+
+            /* ── Resize: keep notes in bounds ── */
+            window.addEventListener('resize', function(){
+              container.querySelectorAll('.note').forEach(keepInBounds);
+            });
+
+            /* ── Debug: verify label exists ── */
+            console.log('label found:', container.querySelector('div'));
+          })();
+          </script>
+        </div>
+      </div>
+
+      <!-- Bottom: 2 smaller cards -->
+      <div class="flex flex-col md:flex-row gap-4 md:gap-6">
+        <div class="lab-glow-card flex-1 p-8 md:p-14 flex flex-col gap-4 md:gap-5">
+          <span class="font-mono text-[22px] text-[#0aaba4]">⬡</span>
+          <h3 class="font-syne font-bold text-[16px] md:text-[17px] text-[#f2f2f2]">Continuous Learning Loop</h3>
+          <p class="font-mono text-[11px] md:text-[12px] text-[#888] leading-[22px]">
+            During the Charon phase I deepened my Tailwind CSS expertise and began making frontend changes autonomously — bypassing the traditional design-to-dev handoff. If I need a skill, I build it. That's not just attitude; it's a competitive advantage for any team I join.
+          </p>
+          <div class="flex gap-2 flex-wrap">
+            <span class="tag-teal">Self-directed</span>
+            <span class="tag-teal">Frontend</span>
+            <span class="tag-teal">CSS</span>
+            <span class="tag-teal">Growth Mindset</span>
+          </div>
+        </div>
+
+        <div class="lab-glow-card flex-1 p-8 md:p-14 flex flex-col gap-4 md:gap-5">
+          <span class="font-mono text-[22px] text-[#0aaba4]">◈</span>
+          <h3 class="font-syne font-bold text-[16px] md:text-[17px] text-[#f2f2f2]">Rapid Prototyping Philosophy</h3>
+          <p class="font-mono text-[11px] md:text-[12px] text-[#888] leading-[22px]">
+            The best design argument is a working prototype. I build clickable Figma prototypes for stakeholder alignment and quick HTML/Tailwind proofs-of-concept that development teams can actually use as reference. Design and code, together from the start.
+          </p>
+          <div class="flex gap-2 flex-wrap">
+            <span class="tag-teal">Figma</span>
+            <span class="tag-teal">HTML</span>
+            <span class="tag-teal">Tailwind</span>
+            <span class="tag-teal">Rapid Iteration</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       SKILLS / FREELANCE WORK
+  ══════════════════════════════════════════════ -->
+  <section id="skills" class="bg-[#111] pt-12 pb-16 md:pb-20 px-6 md:px-12" style="position:relative; z-index:1;">
+    <div class="flex items-center gap-4 mb-6">
+      <span class="section-label">04 — Skills</span>
+      <div class="divider"></div>
+    </div>
+    <h2 class="font-playfair font-bold text-[#f2f2f2] leading-[1.1] mb-12 md:mb-16" style="font-size: clamp(28px, 3.2vw, 48px); max-width: 480px;">
+      The skills behind<br>
+      the finished <span style="color:#00BFA5; font-style:italic;">product.</span>
+    </h2>
+
+    <!-- Skills: 3-column cards -->
+    <div id="skills-grid" style="display:grid; grid-template-columns:repeat(3,1fr); gap:1.5rem;">
+
+      <!-- Card 01: UX Design -->
+      <div class="skill-card" data-glow style="border:1px solid #2a2a2a; border-radius:4px; padding:1.75rem; display:flex; flex-direction:column; gap:0; opacity:0; transform:translateY(24px); transition:opacity 0.6s ease, transform 0.6s ease;">
+        <div class="glow-inner"></div>
+        <!-- Top row: number + icon -->
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:2rem;">
+          <span style="font-family:'DM Mono',monospace; font-size:12px; color:#444; letter-spacing:1.5px;">01</span>
+          <div style="width:36px; height:36px; border:1px solid #2e2e2e; border-radius:4px; display:flex; align-items:center; justify-content:center;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00BFA5" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+            </svg>
+          </div>
+        </div>
+        <!-- Category + tagline -->
+        <h3 style="font-family:'DM Mono',monospace; font-size:12px; font-weight:500; color:#00BFA5; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:0.5rem;">UX Design</h3>
+        <p style="font-family:'DM Mono',monospace; font-size:12px; color:#555; line-height:1.6; margin-bottom:1.75rem;">Research-driven design that puts the user first.</p>
+        <!-- Skill list -->
+        <ul style="display:flex; flex-direction:column; gap:0.75rem; list-style:none; padding:0; margin:0;">
+          <li style="font-family:'DM Mono',monospace; font-size:12px; color:#888; display:flex; align-items:center; gap:0.6rem;"><span style="color:#00BFA5; font-size:12px;">•</span>UX Strategy &amp; Research</li>
+          <li style="font-family:'DM Mono',monospace; font-size:12px; color:#888; display:flex; align-items:center; gap:0.6rem;"><span style="color:#00BFA5; font-size:12px;">•</span>Information Architecture</li>
+          <li style="font-family:'DM Mono',monospace; font-size:12px; color:#888; display:flex; align-items:center; gap:0.6rem;"><span style="color:#00BFA5; font-size:12px;">•</span>User Flows &amp; Wireframing</li>
+          <li style="font-family:'DM Mono',monospace; font-size:12px; color:#888; display:flex; align-items:center; gap:0.6rem;"><span style="color:#00BFA5; font-size:12px;">•</span>Prototyping (Figma)</li>
+          <li style="font-family:'DM Mono',monospace; font-size:12px; color:#888; display:flex; align-items:center; gap:0.6rem;"><span style="color:#00BFA5; font-size:12px;">•</span>Usability Testing</li>
+          <li style="font-family:'DM Mono',monospace; font-size:12px; color:#888; display:flex; align-items:center; gap:0.6rem;"><span style="color:#00BFA5; font-size:12px;">•</span>Accessibility (WCAG)</li>
+          <li style="font-family:'DM Mono',monospace; font-size:12px; color:#888; display:flex; align-items:center; gap:0.6rem;"><span style="color:#00BFA5; font-size:12px;">•</span>Guided Flow Design</li>
+        </ul>
+      </div>
+
+      <!-- Card 02: UI Design & Systems -->
+      <div class="skill-card" data-glow style="border:1px solid #2a2a2a; border-radius:4px; padding:1.75rem; display:flex; flex-direction:column; gap:0; opacity:0; transform:translateY(24px); transition:opacity 0.6s ease 0.12s, transform 0.6s ease 0.12s;">
+        <div class="glow-inner"></div>
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:2rem;">
+          <span style="font-family:'DM Mono',monospace; font-size:12px; color:#444; letter-spacing:1.5px;">02</span>
+          <div style="width:36px; height:36px; border:1px solid #2e2e2e; border-radius:4px; display:flex; align-items:center; justify-content:center;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00BFA5" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+            </svg>
+          </div>
+        </div>
+        <h3 style="font-family:'DM Mono',monospace; font-size:12px; font-weight:500; color:#00BFA5; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:0.5rem;">UI Design &amp; Systems</h3>
+        <p style="font-family:'DM Mono',monospace; font-size:12px; color:#555; line-height:1.6; margin-bottom:1.75rem;">Scalable visual systems built for consistency.</p>
+        <ul style="display:flex; flex-direction:column; gap:0.75rem; list-style:none; padding:0; margin:0;">
+          <li style="font-family:'DM Mono',monospace; font-size:12px; color:#888; display:flex; align-items:center; gap:0.6rem;"><span style="color:#00BFA5; font-size:12px;">•</span>Design Systems</li>
+          <li style="font-family:'DM Mono',monospace; font-size:12px; color:#888; display:flex; align-items:center; gap:0.6rem;"><span style="color:#00BFA5; font-size:12px;">•</span>Component Libraries</li>
+          <li style="font-family:'DM Mono',monospace; font-size:12px; color:#888; display:flex; align-items:center; gap:0.6rem;"><span style="color:#00BFA5; font-size:12px;">•</span>Visual Design</li>
+          <li style="font-family:'DM Mono',monospace; font-size:12px; color:#888; display:flex; align-items:center; gap:0.6rem;"><span style="color:#00BFA5; font-size:12px;">•</span>Data Visualisation</li>
+          <li style="font-family:'DM Mono',monospace; font-size:12px; color:#888; display:flex; align-items:center; gap:0.6rem;"><span style="color:#00BFA5; font-size:12px;">•</span>Branding &amp; Identity</li>
+          <li style="font-family:'DM Mono',monospace; font-size:12px; color:#888; display:flex; align-items:center; gap:0.6rem;"><span style="color:#00BFA5; font-size:12px;">•</span>Print &amp; Web Consistency</li>
+          <li style="font-family:'DM Mono',monospace; font-size:12px; color:#888; display:flex; align-items:center; gap:0.6rem;"><span style="color:#00BFA5; font-size:12px;">•</span>Motion &amp; Micro-interactions</li>
+        </ul>
+      </div>
+
+      <!-- Card 03: Frontend & Tools -->
+      <div class="skill-card" data-glow style="border:1px solid #2a2a2a; border-radius:4px; padding:1.75rem; display:flex; flex-direction:column; gap:0; opacity:0; transform:translateY(24px); transition:opacity 0.6s ease 0.24s, transform 0.6s ease 0.24s;">
+        <div class="glow-inner"></div>
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:2rem;">
+          <span style="font-family:'DM Mono',monospace; font-size:12px; color:#444; letter-spacing:1.5px;">03</span>
+          <div style="width:36px; height:36px; border:1px solid #2e2e2e; border-radius:4px; display:flex; align-items:center; justify-content:center;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00BFA5" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="8 6 2 12 8 18"/><polyline points="16 6 22 12 16 18"/><line x1="13" y1="4" x2="11" y2="20"/>
+            </svg>
+          </div>
+        </div>
+        <h3 style="font-family:'DM Mono',monospace; font-size:12px; font-weight:500; color:#00BFA5; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:0.5rem;">Frontend &amp; Tools</h3>
+        <p style="font-family:'DM Mono',monospace; font-size:12px; color:#555; line-height:1.6; margin-bottom:1.75rem;">From Figma to production — no handoff needed.</p>
+        <ul style="display:flex; flex-direction:column; gap:0.75rem; list-style:none; padding:0; margin:0;">
+          <li style="font-family:'DM Mono',monospace; font-size:12px; color:#888; display:flex; align-items:center; gap:0.6rem;"><span style="color:#00BFA5; font-size:12px;">•</span>Tailwind CSS</li>
+          <li style="font-family:'DM Mono',monospace; font-size:12px; color:#888; display:flex; align-items:center; gap:0.6rem;"><span style="color:#00BFA5; font-size:12px;">•</span>HTML / CSS / JS</li>
+          <li style="font-family:'DM Mono',monospace; font-size:12px; color:#888; display:flex; align-items:center; gap:0.6rem;"><span style="color:#00BFA5; font-size:12px;">•</span>AI-assisted (Vibe Coding)</li>
+          <li style="font-family:'DM Mono',monospace; font-size:12px; color:#888; display:flex; align-items:center; gap:0.6rem;"><span style="color:#00BFA5; font-size:12px;">•</span>Figma / FigJam</li>
+          <li style="font-family:'DM Mono',monospace; font-size:12px; color:#888; display:flex; align-items:center; gap:0.6rem;"><span style="color:#00BFA5; font-size:12px;">•</span>Miro</li>
+          <li style="font-family:'DM Mono',monospace; font-size:12px; color:#888; display:flex; align-items:center; gap:0.6rem;"><span style="color:#00BFA5; font-size:12px;">•</span>Dev Collaboration</li>
+          <li style="font-family:'DM Mono',monospace; font-size:12px; color:#888; display:flex; align-items:center; gap:0.6rem;"><span style="color:#00BFA5; font-size:12px;">•</span>Product Management basics</li>
+        </ul>
+      </div>
+
+    </div>
+
+    <script>
+    (function () {
+      var cards = document.querySelectorAll('#skills-grid .skill-card');
+
+      // Scroll reveal
+      var observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+          observer.unobserve(entry.target);
+        });
+      }, { threshold: 0.15 });
+      cards.forEach(function (c) { observer.observe(c); });
+
+    })();
+
+    // ── Spotlight pointer tracker (per-card) ──
+    (function () {
+      document.querySelectorAll('.skill-card[data-glow]').forEach(function (card) {
+        card.addEventListener('mousemove', function (e) {
+          var rect = card.getBoundingClientRect();
+          card.style.setProperty('--x', (e.clientX - rect.left).toFixed(2));
+          card.style.setProperty('--y', (e.clientY - rect.top).toFixed(2));
+        });
+        card.addEventListener('mouseleave', function () {
+          card.style.setProperty('--x', '-9999');
+          card.style.setProperty('--y', '-9999');
+        });
+      });
+    })();
+    </script>
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       CONTACT
+  ══════════════════════════════════════════════ -->
+  <section id="contact" class="bg-[#111] py-16 px-6 md:px-12 flex flex-col lg:flex-row items-start lg:items-center gap-12 lg:gap-24" style="position:relative; z-index:1;">
+    <div class="flex flex-col gap-8 shrink-0">
+      <span class="section-label">06 — Contact</span>
+      <h2 class="font-playfair font-black text-[#f2f2f2] tracking-[-1.92px] leading-[0.95]" style="font-size: clamp(52px, 6vw, 96px);">
+        Let's make<br>
+        something<br>
+        <em class="italic text-[#0aaba4]">clear.</em>
+      </h2>
+    </div>
+
+    <div class="flex flex-col w-full lg:max-w-[800px]">
+      <div class="contact-row flex items-center h-[64px] md:h-[70px]">
+        <span class="font-mono text-[9px] md:text-[10px] text-[#555] tracking-[1.79px] uppercase w-24 md:w-28 shrink-0">Email</span>
+        <a id="email-link" rel="nofollow" class="font-syne font-semibold text-[15px] md:text-[17px] text-[#d8d8d8] val hover:text-[#0aaba4] transition-colors"></a>
+      </div>
+      <div class="contact-row flex items-center h-[64px] md:h-[70px]">
+        <span class="font-mono text-[9px] md:text-[10px] text-[#555] tracking-[1.79px] uppercase w-24 md:w-28 shrink-0">LinkedIn</span>
+        <a href="https://www.linkedin.com/in/rika-schmurr/" target="_blank" class="font-syne font-semibold text-[15px] md:text-[17px] text-[#d8d8d8] val hover:text-[#0aaba4] transition-colors">linkedin.com/in/rika</a>
+      </div>
+      <div class="contact-row flex items-center h-[64px] md:h-[70px]">
+        <span class="font-mono text-[9px] md:text-[10px] text-[#555] tracking-[1.79px] uppercase w-24 md:w-28 shrink-0">Location</span>
+        <span class="font-syne font-semibold text-[14px] md:text-[17px] text-[#d8d8d8] val">Europa — Open to Remote &amp; On-site</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       FOOTER
+  ══════════════════════════════════════════════ -->
+  <footer class="bg-[#111] border-t border-[#2e2e2e] h-[70px] flex items-center justify-between px-6 md:px-12">
+    <span class="font-mono text-[9px] md:text-[10px] text-[#555] tracking-[0.99px]">© 2026 Rika. All rights reserved.</span>
+    <a href="#hero" class="font-mono text-[9px] md:text-[10px] text-[#555] tracking-[1.19px] uppercase hover:text-[#0aaba4] transition-colors">Back to top ↑</a>
+  </footer>
+
+  <!-- ══════════════════════════════════════════════
+       SCRIPTS
+  ══════════════════════════════════════════════ -->
+  <script>
+    // ── Hero — GSAP pin + staggered line animation + video LERP ──
+    gsap.registerPlugin(ScrollTrigger);
+
+    (function () {
+      var desktopVideo  = document.getElementById('hero-video');
+      var mobileVideo   = document.getElementById('hero-video-mobile');
+      var mobileWrap    = document.getElementById('hero-mobile-video-wrap');
+      var heroSubtext   = document.getElementById('hero-subtext');
+      var heroCTAStats  = document.getElementById('hero-cta-stats');
+
+      // Phase 1: 3 lines | Phase 2: 2 lines
+      var p1 = [0,1,2].map(function(i){ return document.getElementById('p1-'+i); });
+      var p2 = [0,1].map(function(i){ return document.getElementById('p2-'+i); });
+
+      function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
+      function clamp01(v) { return Math.max(0, Math.min(1, v)); }
+      function getT(prog, start, end) {
+        return easeOut(clamp01((prog - start) / (end - start)));
+      }
+      function setLine(el, ty, op) {
+        if (!el) return;
+        el.style.transform = 'translateY(' + ty + 'px)';
+        el.style.opacity   = String(op);
+      }
+
+      // Desktop LERP state
+      var dCurrentTime = 0, dTargetTime = 0;
+      // Mobile LERP state (separate — different scrub window)
+      var mCurrentTime = 0, mTargetTime = 0;
+      var rafId;
+
+      function animate() {
+        // Desktop video LERP
+        dCurrentTime += (dTargetTime - dCurrentTime) * 0.12;
+        if (Math.abs(dTargetTime - dCurrentTime) < 0.001) dCurrentTime = dTargetTime;
+        if (desktopVideo && desktopVideo.readyState >= 2) desktopVideo.currentTime = dCurrentTime;
+
+        // Mobile video LERP (0.08 — slightly smoother)
+        mCurrentTime += (mTargetTime - mCurrentTime) * 0.08;
+        if (Math.abs(mTargetTime - mCurrentTime) < 0.001) mCurrentTime = mTargetTime;
+        if (mobileVideo && mobileVideo.readyState >= 2) mobileVideo.currentTime = mCurrentTime;
+
+        rafId = requestAnimationFrame(animate);
+      }
+
+      function onProgress(prog) {
+        var isMobile = window.innerWidth <= 768;
+
+        // ── Text crossfade timing ──
+        // Mobile: crossfade window 33%–66% with tighter stagger
+        // Desktop: crossfade window 25%–75%
+        var STAGGER = isMobile ? 0.03 : 0.05;
+        var W_START = isMobile ? 0.33 : 0.25;
+        var W_LEN   = isMobile ? 0.25 : 0.50;
+
+        // Phase 1 out — 3 lines staggered, slide up 120 px
+        for (var i = 0; i < 3; i++) {
+          var ls = W_START + i * STAGGER, le = ls + W_LEN;
+          var t  = getT(prog, ls, le);
+          setLine(p1[i], -120 * t, 1 - t);
+        }
+        // Phase 2 in — 2 lines staggered, rise from 120 px below
+        for (var j = 0; j < 2; j++) {
+          var ls2 = W_START + j * STAGGER, le2 = ls2 + W_LEN;
+          var t2  = getT(prog, ls2, le2);
+          setLine(p2[j], 120 * (1 - t2), t2);
+        }
+
+        if (isMobile) {
+          // ── Mobile 3-phase behaviour ──
+          // Phase 1 (0–33%):  label + headline + video only; video at frame 0, scale 0.8
+          // Phase 1 (0–33%):  text P1 visible, video at first frame, scale 0.95
+          // Phase 2 (33–66%): text crossfades, video scrubs 0→end, scale 0.95→1.0
+          // Phase 3 (66–100%): P2 text visible, video locked at last frame,
+          //                    paragraph + button + stats fade in
+
+          // ── Video scale: 0.95 (Phase 1) → 1.0 (end of Phase 2) ──
+          if (mobileWrap) {
+            mobileWrap.style.opacity = '1';
+            if (prog < 0.33) {
+              mobileWrap.style.transform = 'scale(0.95)';
+            } else if (prog < 0.66) {
+              var p2mob = clamp01((prog - 0.33) / 0.33);
+              mobileWrap.style.transform = 'scale(' + (0.95 + 0.05 * p2mob).toFixed(3) + ')';
+            } else {
+              mobileWrap.style.transform = 'scale(1)';
+            }
+          }
+
+          // ── Video scrub: Phase 2 only (0.33–0.65), lerp 0.08 ──
+          if (mobileVideo && mobileVideo.duration) {
+            var mDur = mobileVideo.duration;
+            if (prog >= 0.65) {
+              // Force last frame — no lerp lag
+              mTargetTime = mCurrentTime = mDur;
+              if (mobileVideo.readyState >= 2) mobileVideo.currentTime = mDur;
+            } else if (prog >= 0.33) {
+              mTargetTime = mDur * clamp01((prog - 0.33) / 0.32);
+            } else {
+              // Phase 1: frozen at first frame
+              mTargetTime = 0;
+              mCurrentTime = 0;
+            }
+          }
+
+          // Paragraph + stats always visible on mobile — no JS toggling needed
+
+        } else {
+          // ── Desktop video scrub: progress 0.25–0.74 ──
+          var dur = desktopVideo && desktopVideo.duration;
+          if (dur) {
+            if (prog >= 0.74) {
+              dTargetTime  = dCurrentTime = dur;
+              if (desktopVideo.readyState >= 2) desktopVideo.currentTime = dur;
+            } else {
+              dTargetTime = dur * clamp01((prog - 0.25) / 0.49);
+            }
+          }
+        }
+      }
+
+      // GSAP ScrollTrigger — pin hero
+      // Desktop: 400vh total (+=300%) | Mobile: 300vh total (+=200%)
+      ScrollTrigger.create({
+        trigger:       '#hero',
+        start:         'top top',
+        end:           window.innerWidth <= 768 ? '+=200%' : '+=300%',
+        pin:           true,
+        scrub:         0.5,
+        fastScrollEnd: true,
+        onUpdate:      function(self) { onProgress(self.progress); }
+      });
+
+      // Resize: debounced refresh to prevent layout glitches
+      var resizeTimer;
+      window.addEventListener('resize', function() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function() { ScrollTrigger.refresh(); }, 200);
+      });
+
+      // Start RAF after first video is ready
+      var rafStarted = false;
+      function startRaf() {
+        if (rafStarted) return;
+        rafStarted = true;
+        [desktopVideo, mobileVideo].filter(Boolean).forEach(function(v) { v.currentTime = 0; });
+        rafId = requestAnimationFrame(animate);
+      }
+      [desktopVideo, mobileVideo].filter(Boolean).forEach(function(v) {
+        v.addEventListener('loadedmetadata', startRaf, { once: true });
+        if (v.readyState >= 1) startRaf();
+      });
+
+      onProgress(0); // set initial state (hides mobile video at prog=0)
+    })();
+
+
+    // ── Case Studies — ScrollTrigger animations ──
+    (function () {
+      document.querySelectorAll('.cs-section').forEach(function (section) {
+        var mockup   = section.querySelector('.cs-mockup-wrap');
+        var ghostNum = section.querySelector('.cs-ghost-num');
+        var meta     = section.querySelector('.cs-meta');
+        var title    = section.querySelector('.cs-title');
+        var tagline  = section.querySelector('.cs-tagline');
+        var stats    = section.querySelector('.cs-stats');
+        var cta      = section.querySelector('.cs-cta');
+
+        // ── Staggered fade-in for text elements ──
+        var els = [ghostNum, meta, title, tagline, stats, cta].filter(Boolean);
+        gsap.set(els, { opacity: 0, y: 60 });
+        if (mockup) gsap.set(mockup, { opacity: 0, y: 40 });
+
+        ScrollTrigger.create({
+          trigger: section,
+          start:   'top 80%',
+          once:    true,
+          onEnter: function () {
+            gsap.to(els, {
+              opacity:  1,
+              y:        0,
+              duration: 0.8,
+              ease:     'power2.out',
+              stagger:  0.10
+            });
+            if (mockup) {
+              gsap.to(mockup, {
+                opacity:  1,
+                y:        0,
+                duration: 0.9,
+                ease:     'power2.out',
+                delay:    0.05
+              });
+            }
+
+            // ── Stats count-up for numeric values ──
+            section.querySelectorAll('.cs-stats [data-count]').forEach(function (el) {
+              var target = parseFloat(el.dataset.count);
+              var prefix = el.dataset.prefix || '';
+              var suffix = el.dataset.suffix || '';
+              gsap.fromTo({ val: 0 }, { val: target }, {
+                duration: 1.4,
+                ease:     'power2.out',
+                delay:    0.5,
+                onUpdate: function () {
+                  el.textContent = prefix + Math.round(this.targets()[0].val) + suffix;
+                }
+              });
+            });
+          }
+        });
+
+        // ── Parallax on mockup: moves at 0.3× scroll speed ──
+        if (mockup) {
+          gsap.to(mockup, {
+            yPercent: -12,
+            ease:     'none',
+            scrollTrigger: {
+              trigger: section,
+              start:   'top bottom',
+              end:     'bottom top',
+              scrub:   1
+            }
+          });
+        }
+      });
+    })();
+
+
+    // ── Case Study video: pin + play (desktop) / autoplay on enter (mobile) ──
+    function initCaseStudyVideo(sectionId, videoId) {
+      const section = document.querySelector(sectionId);
+      const video = document.querySelector(videoId);
+      if (!section || !video) return;
+
+      // ── All viewports: pin + play forward, rewind on scroll back ──
+      video.pause();
+      video.currentTime = 0;
+
+      let hasPlayed = false;
+      let isRewinding = false;
+      let rewindInterval = null;
+
+      function stopRewind() {
+        if (rewindInterval) {
+          clearInterval(rewindInterval);
+          rewindInterval = null;
+        }
+        isRewinding = false;
+      }
+
+      function rewindToStart(onDone) {
+        stopRewind();
+        if (video.currentTime <= 0) {
+          if (onDone) onDone();
+          return;
+        }
+        isRewinding = true;
+        rewindInterval = setInterval(() => {
+          video.currentTime = Math.max(0, video.currentTime - 0.05);
+          if (video.currentTime <= 0) {
+            stopRewind();
+            video.currentTime = 0;
+            video.pause();
+            if (onDone) onDone();
+          }
+        }, 16);
+      }
+
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'center center',
+        end: '+=800',
+        pin: true,
+        pinSpacing: true,
+        anticipatePin: 1,
+        onEnter: () => {
+          stopRewind();
+          if (!hasPlayed) {
+            hasPlayed = true;
+            video.currentTime = 0;
+            video.playbackRate = 1;
+            video.play();
+          }
+        },
+        onLeaveBack: () => {
+          hasPlayed = false;
+          video.pause();
+          rewindToStart();
+        },
+        onEnterBack: () => {
+          hasPlayed = false;
+          video.pause();
+          rewindToStart();
+        },
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initCaseStudyVideo('#case-study-01', '#laptop-video');
+      initCaseStudyVideo('#case-study-02', '#ecaria-video');
+    });
+
+
+    // ── Scroll spy ──
+    const navLinks = document.querySelectorAll('.nav-link[data-section]');
+    const sections = ['about', 'work', 'lab', 'skills', 'contact'].map(id => document.getElementById(id));
+
+    function setActive(id) {
+      navLinks.forEach(link => link.classList.toggle('active', link.dataset.section === id));
+    }
+
+    const observer = new IntersectionObserver(entries => {
+      const visible = entries
+        .filter(e => e.isIntersecting)
+        .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+      if (visible.length > 0) setActive(visible[0].target.id);
+    }, { rootMargin: '-50% 0px -50% 0px', threshold: 0 });
+
+    sections.forEach(s => { if (s) observer.observe(s); });
+
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        navLinks.forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+      });
+    });
+
+    // ── Hamburger menu ──
+    const hamburger = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobile-menu');
+
+    hamburger.addEventListener('click', () => {
+      mobileMenu.classList.toggle('open');
+    });
+
+    // Close mobile menu on link click
+    mobileMenu.querySelectorAll('a').forEach(a => {
+      a.addEventListener('click', () => mobileMenu.classList.remove('open'));
+    });
+
+    // ── Lab top-card spotlight tracker (per-card, GlowCard translation) ──
+    (function () {
+      document.querySelectorAll('.lab-glow-card').forEach(function (card) {
+        card.addEventListener('mousemove', function (e) {
+          var rect = card.getBoundingClientRect();
+          card.style.setProperty('--x', (e.clientX - rect.left).toFixed(2));
+          card.style.setProperty('--y', (e.clientY - rect.top).toFixed(2));
+        });
+        card.addEventListener('mouseleave', function () {
+          card.style.setProperty('--x', '-9999');
+          card.style.setProperty('--y', '-9999');
+        });
+      });
+    })();
+
+    // ── Email obfuscation ──
+    (function() {
+      const user = 'rika.schmurr';
+      const domain = 'gmail.com';
+      const el = document.getElementById('email-link');
+      if (el) {
+        el.href = 'mailto:' + user + '@' + domain;
+        el.textContent = user + '@' + domain;
+      }
+    })();
+  </script>
+</body>
+</html>
